@@ -44,6 +44,10 @@ return [
         'retention_months' => (int) env('MARKETING_DEMO_RETENTION_MONTHS', 24),
     ],
 
+    'signup' => [
+        'max_attempts_per_hour' => (int) env('MARKETING_SIGNUP_MAX_ATTEMPTS', 5),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Pricing
@@ -52,9 +56,16 @@ return [
     | Monthly prices are in euros, excluding VAT. A null price renders
     | "Sur devis". Yearly billing applies `yearly_free_months`.
     |
+    | A plan is available for online signup only when both Stripe price IDs
+    | are configured; otherwise its call to action falls back to the demo.
+    | Displayed prices must match the Stripe prices (Stripe is the source
+    | of truth for what is charged).
+    |
     */
 
     'yearly_free_months' => 2,
+
+    'trial_days' => (int) env('BILLING_TRIAL_DAYS', 14),
 
     'plans' => [
         [
@@ -62,6 +73,10 @@ return [
             'name' => 'Indépendant',
             'audience' => 'Pour un label qui gère ses premiers artistes.',
             'monthly_price' => 49,
+            'stripe_prices' => [
+                'monthly' => env('STRIPE_PRICE_INDEPENDANT_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_INDEPENDANT_YEARLY'),
+            ],
             'highlighted' => false,
             'features' => [
                 "Jusqu'à 10 artistes",
@@ -76,6 +91,10 @@ return [
             'name' => 'Label',
             'audience' => 'Pour un catalogue actif avec plusieurs distributeurs.',
             'monthly_price' => 149,
+            'stripe_prices' => [
+                'monthly' => env('STRIPE_PRICE_LABEL_MONTHLY'),
+                'yearly' => env('STRIPE_PRICE_LABEL_YEARLY'),
+            ],
             'highlighted' => true,
             'features' => [
                 "Jusqu'à 60 artistes",
