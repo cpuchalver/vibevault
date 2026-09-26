@@ -6,8 +6,8 @@ namespace Database\Factories;
 
 use App\Enums\BandType;
 use App\Models\Artist;
-use App\Models\Label;
 use App\Models\Band;
+use App\Models\Label;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

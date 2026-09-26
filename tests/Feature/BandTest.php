@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Enums\LabelRole;
 use App\Enums\BandType;
+use App\Enums\LabelRole;
 use App\Filament\Label\Resources\Bands\Pages\CreateBand;
 use App\Filament\Label\Resources\Bands\Pages\EditBand;
 use App\Filament\Label\Resources\Bands\RelationManagers\MembersRelationManager;
 use App\Models\Artist;
-use App\Models\Label;
 use App\Models\Band;
+use App\Models\Label;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
