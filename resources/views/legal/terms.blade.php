@@ -8,6 +8,16 @@
     <h2>Utilisation du formulaire de demande de démo</h2>
     <p>Vous vous engagez à fournir des informations exactes et à ne pas utiliser le formulaire à des fins de prospection, d’envoi massif ou de manière automatisée. Les envois sont limités en nombre pour prévenir les abus.</p>
 
+    <h2>Inscription et abonnement en ligne</h2>
+    <p>La création d’un compte en ligne ouvre un espace pour votre label et un abonnement à la formule choisie. La personne qui s’inscrit devient propriétaire du label et déclare agir pour le compte de la structure concernée.</p>
+    <ul>
+        <li>Le premier abonnement d’un label commence par une période d’essai gratuite de {{ config('marketing.trial_days') }} jours. Un moyen de paiement est demandé à l’inscription ; aucun montant n’est prélevé avant la fin de l’essai.</li>
+        <li>Sauf résiliation avant la fin de l’essai, l’abonnement se renouvelle automatiquement à chaque échéance, mensuelle ou annuelle selon la formule choisie.</li>
+        <li>Les prix sont indiqués hors taxes. La TVA applicable est calculée lors du paiement ; les clients professionnels établis dans un autre État membre de l’Union européenne peuvent renseigner leur numéro de TVA intracommunautaire pour bénéficier de l’autoliquidation.</li>
+        <li>Le paiement, les factures et la résiliation sont gérés depuis la page Facturation de l’espace label. La résiliation prend effet à la fin de la période en cours ; l’accès est maintenu jusqu’à cette date.</li>
+        <li>En cas d’échec de paiement, de nouvelles tentatives sont effectuées automatiquement. Si le paiement ne peut aboutir, l’accès à l’espace label est suspendu jusqu’à régularisation.</li>
+    </ul>
+
     <h2>Informations présentées</h2>
     <p>Les descriptions des fonctionnalités et les tarifs sont donnés à titre indicatif et peuvent évoluer. Seules les conditions figurant dans le contrat de service engagent l’éditeur. Les exemples de relevés, de titres et d’artistes sont fictifs.</p>
 

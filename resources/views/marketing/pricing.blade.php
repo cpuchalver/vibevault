@@ -2,6 +2,13 @@
     $plans = config('marketing.plans');
     $yearlyFreeMonths = config('marketing.yearly_free_months');
     $euros = fn (int $amount): string => number_format($amount, 0, ',', "\u{202F}").' €';
+    $catalog = app(\App\Billing\PlanCatalog::class);
+    $trialDays = config('marketing.trial_days');
+    $ctaClasses = fn (bool $isHighlighted): string => \Illuminate\Support\Arr::toCssClasses([
+        'rounded-md px-4 py-2.5 text-center text-sm font-semibold transition-colors',
+        'bg-signal text-white hover:bg-signal-deep' => $isHighlighted,
+        'border border-ink/20 hover:border-ink' => ! $isHighlighted,
+    ]);
 @endphp
 
 <x-layouts.marketing title="Tarifs" description="Les formules VibeVault pour les labels indépendants, les catalogues actifs et les groupes de labels. Portail artiste inclus dans chaque formule.">
@@ -64,16 +71,23 @@
                         @endforeach
                     </ul>
 
-                    <a
-                        href="{{ route('demo') }}"
-                        @class([
-                            'mt-8 rounded-md px-4 py-2.5 text-center text-sm font-semibold transition-colors',
-                            'bg-signal text-white hover:bg-signal-deep' => $plan['highlighted'],
-                            'border border-ink/20 hover:border-ink' => ! $plan['highlighted'],
-                        ])
-                    >
-                        {{ $plan['monthly_price'] === null ? 'Nous contacter' : 'Demander une démo' }}
-                    </a>
+                    <div class="mt-8 flex flex-col gap-2">
+                        @if($catalog->isSelfServe($plan['key']))
+                            <a
+                                href="{{ route('signup', ['formule' => $plan['key'], 'periode' => 'monthly']) }}"
+                                class="{{ $ctaClasses($plan['highlighted']) }} group-has-[#billing-yearly:checked]/billing:hidden"
+                            >Essayer {{ $trialDays }} jours gratuitement</a>
+                            <a
+                                href="{{ route('signup', ['formule' => $plan['key'], 'periode' => 'yearly']) }}"
+                                class="{{ $ctaClasses($plan['highlighted']) }} hidden group-has-[#billing-yearly:checked]/billing:block"
+                            >Essayer {{ $trialDays }} jours gratuitement</a>
+                            <a href="{{ route('demo') }}" class="py-1 text-center text-sm font-medium text-accent hover:underline">Ou demander une démo</a>
+                        @else
+                            <a href="{{ route('demo') }}" class="{{ $ctaClasses($plan['highlighted']) }}">
+                                {{ $plan['monthly_price'] === null ? 'Nous contacter' : 'Demander une démo' }}
+                            </a>
+                        @endif
+                    </div>
                 </article>
             @endforeach
         </section>

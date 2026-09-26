@@ -16,17 +16,28 @@
         <li>Une empreinte non réversible de votre adresse IP, utilisée uniquement pour limiter les envois abusifs. Votre adresse IP elle-même n’est pas conservée.</li>
     </ul>
 
+    <h2>Données collectées lors de l’inscription</h2>
+    <ul>
+        <li>Nom, email et mot de passe (conservé uniquement sous forme chiffrée irréversible) du propriétaire du compte ;</li>
+        <li>Nom du label, formule et périodicité choisies ;</li>
+        <li>Une empreinte non réversible de votre adresse IP, pour limiter les inscriptions abusives.</li>
+    </ul>
+    <p>Les données de paiement (carte, compte bancaire, adresse de facturation, numéro de TVA) sont saisies directement sur la page de paiement de Stripe et ne transitent pas par nos serveurs. Nous ne conservons que l’identifiant client Stripe, le type et les quatre derniers chiffres du moyen de paiement, ainsi que l’état de l’abonnement.</p>
+
     <h2>Finalités et bases légales</h2>
     <ul>
         <li>Répondre à votre demande et organiser la démonstration : votre consentement, que vous pouvez retirer à tout moment ;</li>
         <li>Protéger le formulaire contre les envois automatisés et abusifs : notre intérêt légitime à assurer la sécurité du service.</li>
+        <li>Créer votre compte, gérer votre abonnement, encaisser les paiements et émettre les factures : l’exécution du contrat ;</li>
+        <li>Conserver les factures et pièces comptables : nos obligations légales.</li>
     </ul>
 
     <h2>Durée de conservation</h2>
     <p>Les demandes de démo sont supprimées automatiquement {{ $retentionMonths }} mois après leur envoi, ou plus tôt si vous nous le demandez. Si vous devenez client, les données nécessaires sont reprises dans la relation contractuelle.</p>
 
     <h2>Destinataires</h2>
-    <p>Seules les personnes de VibeVault chargées de vous répondre accèdent à vos données. Elles sont hébergées par <x-legal.value key="host_name" />. Elles ne sont ni vendues, ni louées, ni cédées à des tiers.</p>
+    <p>Seules les personnes de VibeVault chargées de vous répondre ou de gérer votre compte accèdent à vos données. Elles sont hébergées par <x-legal.value key="host_name" />. Elles ne sont ni vendues, ni louées, ni cédées à des tiers.</p>
+    <p>Les paiements sont traités par Stripe Payments Europe, Ltd. (Irlande), prestataire de services de paiement agréé, qui peut transférer certaines données hors de l’Union européenne dans le cadre de garanties appropriées (clauses contractuelles types). Les données de facturation sont conservées pendant la durée légale de conservation des pièces comptables (dix ans).</p>
 
     <h2>Cookies</h2>
     <p>Le site n’utilise que des cookies strictement nécessaires à son fonctionnement : un cookie de session et un jeton de protection contre la falsification des requêtes (CSRF). Ils ne servent ni à la mesure d’audience ni à la publicité et ne nécessitent donc pas votre consentement. Les polices de caractères sont hébergées sur nos serveurs : aucune requête n’est envoyée à un service tiers lors de votre visite.</p>

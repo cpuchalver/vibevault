@@ -10,6 +10,10 @@
         ['route' => 'features', 'label' => 'Fonctionnalités'],
         ['route' => 'pricing', 'label' => 'Tarifs'],
     ];
+    $hasOnlineSignup = app(\App\Billing\PlanCatalog::class)->selfServeOptions() !== [];
+    $primaryCta = $hasOnlineSignup
+        ? ['url' => route('signup'), 'label' => 'Essai gratuit']
+        : ['url' => route('demo'), 'label' => 'Demander une démo'];
 @endphp
 
 <!DOCTYPE html>
@@ -67,8 +71,9 @@
                                 @if(request()->routeIs($item['route'])) aria-current="page" @endif
                             >{{ $item['label'] }}</a>
                         @endforeach
-                        <a href="{{ route('demo') }}" class="rounded-md bg-inverse px-4 py-2 text-sm font-semibold text-on-inverse transition-colors hover:bg-signal hover:text-white">
-                            Demander une démo
+                        <a href="{{ route('filament.label.auth.login') }}" class="text-sm font-medium text-ink-soft transition-colors hover:text-accent">Connexion</a>
+                        <a href="{{ $primaryCta['url'] }}" class="rounded-md bg-inverse px-4 py-2 text-sm font-semibold text-on-inverse transition-colors hover:bg-signal hover:text-white">
+                            {{ $primaryCta['label'] }}
                         </a>
                     </nav>
 
@@ -82,7 +87,8 @@
                             @foreach($navigation as $item)
                                 <a href="{{ route($item['route']) }}" class="rounded px-3 py-2 text-sm hover:bg-paper">{{ $item['label'] }}</a>
                             @endforeach
-                            <a href="{{ route('demo') }}" class="rounded bg-inverse px-3 py-2 text-sm font-semibold text-on-inverse">Demander une démo</a>
+                            <a href="{{ route('filament.label.auth.login') }}" class="rounded px-3 py-2 text-sm hover:bg-paper">Connexion</a>
+                            <a href="{{ $primaryCta['url'] }}" class="rounded bg-inverse px-3 py-2 text-sm font-semibold text-on-inverse">{{ $primaryCta['label'] }}</a>
                         </nav>
                     </details>
                 </div>
