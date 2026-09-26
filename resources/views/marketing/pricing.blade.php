@@ -14,13 +14,13 @@
                 Le portail artiste est inclus dans chaque formule. Prix hors taxes, sans frais de mise en service.
             </p>
 
-            <fieldset class="mt-8 inline-flex rounded-lg border border-rule bg-white p-1 text-sm font-medium">
+            <fieldset class="mt-8 inline-flex rounded-lg border border-rule bg-surface p-1 text-sm font-medium">
                 <legend class="sr-only">Période de facturation</legend>
-                <label class="cursor-pointer rounded-md px-4 py-2 has-checked:bg-ink has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-signal">
+                <label class="cursor-pointer rounded-md px-4 py-2 has-checked:bg-inverse has-checked:text-on-inverse has-focus-visible:outline-2 has-focus-visible:outline-accent">
                     <input type="radio" name="billing" value="monthly" class="sr-only" checked>
                     Mensuel
                 </label>
-                <label class="cursor-pointer rounded-md px-4 py-2 has-checked:bg-ink has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-signal">
+                <label class="cursor-pointer rounded-md px-4 py-2 has-checked:bg-inverse has-checked:text-on-inverse has-focus-visible:outline-2 has-focus-visible:outline-accent">
                     <input type="radio" name="billing" value="yearly" id="billing-yearly" class="sr-only">
                     Annuel, {{ $yearlyFreeMonths }} mois offerts
                 </label>
@@ -30,7 +30,7 @@
         <section aria-label="Formules" class="mx-auto grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-3">
             @foreach($plans as $plan)
                 <article @class([
-                    'flex flex-col rounded-xl border bg-white p-7',
+                    'flex flex-col rounded-xl border bg-surface p-7',
                     'border-ink ring-1 ring-ink' => $plan['highlighted'],
                     'border-rule' => ! $plan['highlighted'],
                 ])>

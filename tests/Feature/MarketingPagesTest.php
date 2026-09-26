@@ -58,3 +58,18 @@ it('shows configured legal information', function (): void {
         ->assertSee('VibeVault SAS')
         ->assertSee('Jeanne Martin');
 });
+
+it('applies the saved theme before styles load and exposes a theme toggle', function (): void {
+    $html = get(route('home'))->assertOk()->getContent();
+
+    $themeScriptPosition = strpos($html, "localStorage.getItem('theme')");
+    $stylesheetPosition = strpos($html, '<link rel="stylesheet"');
+
+    expect($themeScriptPosition)->not->toBeFalse()
+        ->and($html)->toContain('data-theme-toggle')
+        ->and($html)->toContain('aria-label="Activer le thème sombre"');
+
+    if ($stylesheetPosition !== false) {
+        expect($themeScriptPosition)->toBeLessThan($stylesheetPosition);
+    }
+});

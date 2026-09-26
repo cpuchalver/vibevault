@@ -1,18 +1,18 @@
 <div>
     @if($isSubmitted)
-        <div role="status" class="rounded-xl border border-rule bg-white p-8">
+        <div role="status" class="rounded-xl border border-rule bg-surface p-8">
             <x-marketing.logo-mark class="size-10" />
             <h2 class="mt-5 font-display text-2xl font-bold tracking-tight">Demande envoyée</h2>
             <p class="mt-3 leading-relaxed text-ink-soft">
                 Merci. Nous revenons vers vous par email pour convenir d’un créneau.
                 Pour gagner du temps, préparez un export récent d’un de vos distributeurs.
             </p>
-            <a href="{{ route('features') }}" class="mt-6 inline-block text-sm font-semibold text-signal underline underline-offset-4">
+            <a href="{{ route('features') }}" class="mt-6 inline-block text-sm font-semibold text-accent underline underline-offset-4">
                 Parcourir les fonctionnalités en attendant
             </a>
         </div>
     @else
-        <form wire:submit="submit" class="relative rounded-xl border border-rule bg-white p-6 sm:p-8" novalidate>
+        <form wire:submit="submit" class="relative rounded-xl border border-rule bg-surface p-6 sm:p-8" novalidate>
             {{ $this->form }}
 
             {{-- Honeypot: hidden from people and assistive technologies. --}}

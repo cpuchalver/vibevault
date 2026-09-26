@@ -23,7 +23,7 @@
     </section>
 
     {{-- Two sides of the same catalogue --}}
-    <section class="border-y border-rule bg-white">
+    <section class="border-y border-rule bg-surface">
         <div class="mx-auto grid max-w-6xl md:grid-cols-2">
             <div class="px-4 py-14 sm:px-6 md:border-r md:border-rule md:pr-12">
                 <h2 class="font-display text-2xl font-bold tracking-tight">Pour le label</h2>
@@ -61,7 +61,7 @@
                 ['title' => 'Publiez le relevé', 'body' => 'L’artiste est prévenu et retrouve son relevé détaillé dans son espace.'],
             ] as $step)
                 <li class="border-t-2 border-ink pt-4">
-                    <span class="font-display text-sm font-bold text-signal">Étape {{ $loop->iteration }}</span>
+                    <span class="font-display text-sm font-bold text-accent">Étape {{ $loop->iteration }}</span>
                     <h3 class="mt-2 font-display text-lg font-bold">{{ $step['title'] }}</h3>
                     <p class="mt-2 text-sm leading-relaxed text-ink-soft">{{ $step['body'] }}</p>
                 </li>
@@ -70,32 +70,32 @@
     </section>
 
     {{-- Data isolation --}}
-    <section class="bg-ink text-white">
+    <section class="bg-band text-on-band">
         <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1.2fr]">
             <div>
                 <h2 class="font-display text-3xl font-bold tracking-tight text-balance">
                     Les données d’un label restent celles de ce label.
                 </h2>
-                <p class="mt-4 max-w-md leading-relaxed text-white/75">
+                <p class="mt-4 max-w-md leading-relaxed text-on-band/75">
                     Contrats, montants et coordonnées bancaires sont des informations sensibles. VibeVault les cloisonne par conception, pas par convention.
                 </p>
             </div>
             <dl class="grid gap-x-10 gap-y-8 sm:grid-cols-2">
                 <div>
                     <dt class="font-semibold">Isolation à chaque requête</dt>
-                    <dd class="mt-1.5 text-sm leading-relaxed text-white/70">Chaque lecture et chaque écriture est limitée au label connecté. Un artiste ne voit que ses propres données.</dd>
+                    <dd class="mt-1.5 text-sm leading-relaxed text-on-band/70">Chaque lecture et chaque écriture est limitée au label connecté. Un artiste ne voit que ses propres données.</dd>
                 </div>
                 <div>
                     <dt class="font-semibold">Rôles précis</dt>
-                    <dd class="mt-1.5 text-sm leading-relaxed text-white/70">Administration, A&amp;R, comptabilité, artiste : chacun n’accède qu’à ce dont il a besoin.</dd>
+                    <dd class="mt-1.5 text-sm leading-relaxed text-on-band/70">Administration, A&amp;R, comptabilité, artiste : chacun n’accède qu’à ce dont il a besoin.</dd>
                 </div>
                 <div>
                     <dt class="font-semibold">Journal d’accès</dt>
-                    <dd class="mt-1.5 text-sm leading-relaxed text-white/70">Consultations de contrats et publications de relevés sont tracées et consultables.</dd>
+                    <dd class="mt-1.5 text-sm leading-relaxed text-on-band/70">Consultations de contrats et publications de relevés sont tracées et consultables.</dd>
                 </div>
                 <div>
                     <dt class="font-semibold">Conforme au RGPD</dt>
-                    <dd class="mt-1.5 text-sm leading-relaxed text-white/70">Données minimisées, export complet à tout moment et suppression à la résiliation.</dd>
+                    <dd class="mt-1.5 text-sm leading-relaxed text-on-band/70">Données minimisées, export complet à tout moment et suppression à la résiliation.</dd>
                 </div>
             </dl>
         </div>
