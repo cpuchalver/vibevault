@@ -2,7 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Enums\BillingMode;
+use App\Enums\BillingPeriod;
+use App\Enums\LabelRole;
+use App\Models\Label;
+use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /*
@@ -49,4 +56,59 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Makes the "independant" and "label" plans sellable online with test prices.
+ */
+function configureSelfServePlans(): void
+{
+    config()->set('marketing.trial_days', 14);
+    config()->set('marketing.plans', [
+        [
+            'key' => 'independant', 'name' => 'Indépendant', 'audience' => 'Test', 'monthly_price' => 49, 'highlighted' => false, 'features' => [],
+            'stripe_prices' => ['monthly' => 'price_ind_month', 'yearly' => 'price_ind_year'],
+        ],
+        [
+            'key' => 'label', 'name' => 'Label', 'audience' => 'Test', 'monthly_price' => 149, 'highlighted' => true, 'features' => [],
+            'stripe_prices' => ['monthly' => 'price_label_month', 'yearly' => 'price_label_year'],
+        ],
+        [
+            'key' => 'groupe', 'name' => 'Groupe', 'audience' => 'Test', 'monthly_price' => null, 'highlighted' => false, 'features' => [],
+        ],
+    ]);
+}
+
+/**
+ * A self-serve label owned by the given user, without any subscription.
+ */
+function createStripeLabel(User $owner, LabelRole $role = LabelRole::Owner): Label
+{
+    $label = Label::factory()->withMember($owner, $role)->create();
+
+    $label->forceFill([
+        'billing_mode' => BillingMode::Stripe,
+        'plan' => 'label',
+        'billing_period' => BillingPeriod::Monthly,
+    ])->save();
+
+    return $label;
+}
+
+/**
+ * Records a Stripe subscription for the label, as a webhook would.
+ */
+function subscribeLabel(Label $label, string $status = 'active', ?CarbonInterface $trialEndsAt = null, ?CarbonInterface $endsAt = null): void
+{
+    $label->forceFill(['stripe_id' => 'cus_'.Str::random(10)])->save();
+
+    $label->subscriptions()->create([
+        'type' => Label::SubscriptionType,
+        'stripe_id' => 'sub_'.Str::random(10),
+        'stripe_status' => $status,
+        'stripe_price' => 'price_label_month',
+        'quantity' => 1,
+        'trial_ends_at' => $trialEndsAt,
+        'ends_at' => $endsAt,
+    ]);
 }

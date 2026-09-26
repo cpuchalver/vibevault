@@ -73,3 +73,28 @@ it('applies the saved theme before styles load and exposes a theme toggle', func
         expect($themeScriptPosition)->toBeLessThan($stylesheetPosition);
     }
 });
+
+it('offers a free trial on plans sold online and a demo otherwise', function (): void {
+    configureSelfServePlans();
+
+    get(route('pricing'))
+        ->assertOk()
+        ->assertSee(route('signup', ['formule' => 'label', 'periode' => 'monthly']))
+        ->assertSee(route('signup', ['formule' => 'label', 'periode' => 'yearly']))
+        ->assertDontSee(route('signup', ['formule' => 'groupe', 'periode' => 'monthly']))
+        ->assertSee('Essayer 14 jours gratuitement')
+        ->assertSee('Nous contacter');
+
+    get(route('home'))->assertSee('Essai gratuit');
+});
+
+it('falls back to the demo when no plan is sold online', function (): void {
+    configureSelfServePlans();
+    config()->set('marketing.plans', array_map(
+        fn (array $plan): array => [...$plan, 'stripe_prices' => ['monthly' => null, 'yearly' => null]],
+        config('marketing.plans'),
+    ));
+
+    get(route('pricing'))->assertOk()->assertDontSee('Essayer 14 jours gratuitement');
+    get(route('home'))->assertDontSee('Essai gratuit');
+});
