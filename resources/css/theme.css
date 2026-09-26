@@ -1,0 +1,16 @@
+/* Design tokens shared by app.css and forms.css. */
+@theme {
+    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Bricolage Grotesque', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* VibeVault marketing palette */
+    --color-paper: #f5f6f8;
+    --color-ink: #13183a;
+    --color-ink-soft: #2a3160;
+    --color-slate: #5a6178;
+    --color-rule: #d9dce4;
+    --color-signal: #2b3ae6;
+    --color-signal-deep: #1f2bb3;
+    --color-meter: #f5b700;
+}

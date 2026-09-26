@@ -1,0 +1,16 @@
+/*
+ * Filament form components for the public site. Loaded only on pages that
+ * render a Filament form (see the `with-forms` layout prop), so the marketing
+ * pages stay lightweight.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import './theme.css';
+
+@import '../../vendor/filament/support/resources/css/index.css';
+@import '../../vendor/filament/actions/resources/css/index.css';
+@import '../../vendor/filament/forms/resources/css/index.css';
+@import '../../vendor/filament/notifications/resources/css/index.css';
+@import '../../vendor/filament/schemas/resources/css/index.css';
+
+@variant dark (&:where(.dark, .dark *));
