@@ -19,6 +19,7 @@ class ArtistInfolist
                     ->schema([
                         TextEntry::make('name')->label(__('Nom de scène')),
                         TextEntry::make('country')->label(__('Pays'))->placeholder('—'),
+                        TextEntry::make('musicGroups.name')->label(__('Groupes'))->badge()->placeholder('—'),
                         TextEntry::make('biography')->label(__('Biographie'))->placeholder('—')->columnSpanFull(),
                     ]),
                 Section::make(__('Données légales'))
