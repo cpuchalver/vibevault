@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\LabelRole;
 use App\Models\Artist;
+use App\Models\Band;
 use App\Models\Label;
 use App\Models\Release;
 use App\Models\User;
@@ -13,11 +14,13 @@ beforeEach(function (): void {
 
     $this->ownLabel = Label::factory()->withMember($this->member, LabelRole::CatalogManager)->create();
     $this->ownArtist = Artist::factory()->for($this->ownLabel)->create(['name' => 'Own Artist']);
-    $this->ownRelease = Release::factory()->forArtist($this->ownArtist)->create(['title' => 'Own Release']);
+    $this->ownBand = Band::factory()->solo($this->ownArtist)->create();
+    $this->ownRelease = Release::factory()->forBand($this->ownBand)->create(['title' => 'Own Release']);
 
     $this->otherLabel = Label::factory()->create();
     $this->otherArtist = Artist::factory()->for($this->otherLabel)->create(['name' => 'Foreign Artist']);
-    $this->otherRelease = Release::factory()->forArtist($this->otherArtist)->create(['title' => 'Foreign Release']);
+    $this->otherBand = Band::factory()->solo($this->otherArtist)->create();
+    $this->otherRelease = Release::factory()->forBand($this->otherBand)->create(['title' => 'Foreign Release']);
 });
 
 it('lists only the releases of the current label', function (): void {
@@ -74,9 +77,9 @@ it('refuses the label panel to unverified users', function (): void {
         ->assertForbidden();
 });
 
-it('refuses to persist a release whose artist belongs to another label', function (): void {
+it('refuses to persist a release whose band belongs to another label', function (): void {
     Release::factory()->create([
-        'artist_id' => $this->otherArtist->getKey(),
+        'band_id' => $this->otherBand->getKey(),
         'label_id' => $this->ownLabel->getKey(),
     ]);
 })->throws(LogicException::class);
