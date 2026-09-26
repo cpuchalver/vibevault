@@ -120,6 +120,65 @@ describe('billing page', function (): void {
     });
 });
 
+describe('payment', function (): void {
+    it('starts Checkout with the chosen price, a trial, automatic tax and VAT number collection', function (): void {
+        $label = createStripeLabel($this->owner);
+        $label->forceFill(['billing_period' => BillingPeriod::Yearly])->save();
+
+        $this->actingAs($this->owner)
+            ->post(route('signup.checkout', ['label' => $label->slug]))
+            ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_123');
+
+        $session = $this->stripe->lastRequestTo('/v1/checkout/sessions')['params'];
+
+        expect($session)
+            ->mode->toBe('subscription')
+            ->line_items->toBe([['price' => 'price_label_year', 'quantity' => 1]])
+            ->automatic_tax->toBe(['enabled' => 'true'])
+            ->tax_id_collection->toBe(['enabled' => 'true'])
+            ->customer->toBe('cus_test_123')
+            ->payment_method_collection->toBe('always')
+            ->billing_address_collection->toBe('required')
+            ->and($session['customer_update'])->toBe(['address' => 'auto', 'name' => 'auto'])
+            ->and($session['subscription_data']['trial_end'])->toBeGreaterThan(now()->addDays(13)->getTimestamp())
+            ->and($session['success_url'])->toBe(route('signup.completed', ['label' => $label->slug]))
+            ->and($session['cancel_url'])->toBe(route('signup.payment', ['label' => $label->slug]))
+            ->and($label->fresh()->stripe_id)->toBe('cus_test_123');
+    });
+
+    it('shows a retry page when Stripe fails or is not configured', function (Closure $breakStripe): void {
+        $label = createStripeLabel($this->owner);
+        $breakStripe($this->stripe);
+
+        $this->actingAs($this->owner)
+            ->post(route('signup.checkout', ['label' => $label->slug]))
+            ->assertRedirect(route('signup.payment', ['label' => $label->slug, 'erreur' => 1]));
+
+        $this->actingAs($this->owner)
+            ->get(route('signup.payment', ['label' => $label->slug, 'erreur' => 1]))
+            ->assertOk()
+            ->assertSee('La page de paiement n’a pas pu être ouverte.');
+    })->with([
+        'Stripe API error' => [fn (FakeStripeHttpClient $stripe) => $stripe->failCheckout = true],
+        'missing secret key' => [fn () => config()->set('cashier.secret', '')],
+    ]);
+
+    it('waits on the return page until the webhook activates the subscription, then opens the dashboard', function (): void {
+        $label = createStripeLabel($this->owner);
+
+        $this->actingAs($this->owner)
+            ->get(route('signup.completed', ['label' => $label->slug]))
+            ->assertOk()
+            ->assertSee('<meta http-equiv="refresh" content="3">', escape: false);
+
+        subscribeLabel($label, 'trialing', now()->addDays(14));
+
+        $this->actingAs($this->owner)
+            ->get(route('signup.completed', ['label' => $label->slug]))
+            ->assertRedirect(Filament::getPanel('label')->getUrl($label));
+    });
+});
+
 describe('payment resumption', function (): void {
     it('starts a new Checkout without a second free trial', function (): void {
         $label = createStripeLabel($this->owner);

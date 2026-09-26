@@ -2,6 +2,7 @@
     'title' => null,
     'description' => 'VibeVault centralise le catalogue, les contrats et les royalties de votre label, et offre à chaque artiste un espace sécurisé pour suivre ses sorties et ses relevés.',
     'withForms' => false,
+    'refreshSeconds' => null,
 ])
 
 @php
@@ -35,6 +36,9 @@
         <meta property="og:locale" content="fr_FR">
 
         <meta name="color-scheme" content="light dark">
+        @if($refreshSeconds)
+            <meta http-equiv="refresh" content="{{ (int) $refreshSeconds }}">
+        @endif
         <x-marketing.theme-script />
 
         @fonts

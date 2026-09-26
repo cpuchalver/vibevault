@@ -10,6 +10,7 @@ use App\Models\DemoRequest;
 use App\Models\Label;
 use App\Models\User;
 use Filament\Auth\Notifications\VerifyEmail;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Features\SupportTesting\Testable;
@@ -85,10 +86,10 @@ it('redirects signed-in users away from the signup page', function (): void {
         ->assertRedirect('/label');
 });
 
-it('creates the owner, the self-serve label and sends them to Stripe Checkout', function (): void {
+it('creates the owner and the self-serve label, then opens the label dashboard', function (): void {
     submitSignup()
         ->assertHasNoFormErrors()
-        ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_123');
+        ->assertRedirect(Filament::getPanel('label')->getUrl(Label::sole()));
 
     $owner = User::sole();
     $label = Label::sole();
@@ -102,30 +103,40 @@ it('creates the owner, the self-serve label and sends them to Stripe Checkout', 
         ->billing_mode->toBe(BillingMode::Stripe)
         ->plan->toBe('label')
         ->billing_period->toBe(BillingPeriod::Yearly)
-        ->stripe_id->toBe('cus_test_123')
+        ->stripe_id->toBeNull()
         ->and($owner->roleInLabel($label))->toBe(LabelRole::Owner)
         ->and(auth()->id())->toBe($owner->getKey());
 
     Notification::assertSentTo($owner, VerifyEmail::class);
 });
 
-it('starts Checkout with the configured price, a trial, automatic tax and VAT number collection', function (): void {
+it('does not call Stripe while signing up', function (): void {
+    config()->set('cashier.secret', '');
+
+    submitSignup()->assertHasNoFormErrors()->assertRedirect(Filament::getPanel('label')->getUrl(Label::sole()));
+
+    expect($this->stripe->requests)->toBeEmpty();
+});
+
+it('leads the new owner from the dashboard to email verification, then to payment', function (): void {
     submitSignup();
 
-    $session = $this->stripe->lastRequestTo('/v1/checkout/sessions')['params'];
+    $owner = User::sole();
+    $label = Label::sole();
 
-    expect($session)
-        ->mode->toBe('subscription')
-        ->line_items->toBe([['price' => 'price_label_year', 'quantity' => 1]])
-        ->automatic_tax->toBe(['enabled' => 'true'])
-        ->tax_id_collection->toBe(['enabled' => 'true'])
-        ->customer->toBe('cus_test_123')
-        ->payment_method_collection->toBe('always')
-        ->billing_address_collection->toBe('required')
-        ->and($session['customer_update'])->toBe(['address' => 'auto', 'name' => 'auto'])
-        ->and($session['subscription_data']['trial_end'])->toBeGreaterThan(now()->addDays(13)->getTimestamp())
-        ->and($session['success_url'])->toBe(route('signup.completed', ['label' => Label::sole()->slug]))
-        ->and($session['cancel_url'])->toBe(route('signup.payment', ['label' => Label::sole()->slug]));
+    $this->actingAs($owner)
+        ->get("/label/{$label->slug}")
+        ->assertRedirect(route('filament.label.auth.email-verification.prompt'));
+
+    $owner->markEmailAsVerified();
+
+    $this->actingAs($owner->fresh())
+        ->get("/label/{$label->slug}")
+        ->assertRedirect("/label/{$label->slug}/facturation");
+
+    $this->actingAs($owner->fresh())
+        ->get("/label/{$label->slug}/facturation")
+        ->assertRedirect(route('signup.payment', ['label' => $label->slug]));
 });
 
 it('never lets the visitor choose the charged price', function (): void {
@@ -178,12 +189,4 @@ it('rate limits signups per visitor', function (): void {
         ->assertHasErrors(['data.email']);
 
     expect(Label::count())->toBe(1);
-});
-
-it('keeps the account and offers to retry when Stripe is unavailable', function (): void {
-    $this->stripe->failCheckout = true;
-
-    submitSignup()->assertRedirect(route('signup.payment', ['label' => Label::sole()->slug, 'erreur' => 1]));
-
-    expect(Label::sole()->billing_mode)->toBe(BillingMode::Stripe);
 });

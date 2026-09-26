@@ -9,14 +9,14 @@
                 {{ $trialDays }} jours pour tout essayer.
             </h1>
             <p class="mt-5 max-w-lg text-lg leading-relaxed text-ink-soft">
-                Créez votre compte, puis enregistrez un moyen de paiement sur la page sécurisée de Stripe. Rien n’est prélevé avant la fin de l’essai.
+                Créez votre compte et votre espace label. Vous enregistrerez ensuite un moyen de paiement sur la page sécurisée de Stripe : rien n’est prélevé avant la fin de l’essai.
             </p>
 
             <h2 class="mt-12 font-display text-lg font-bold">Ce qui se passe ensuite</h2>
             <ol class="mt-5 space-y-6">
                 @foreach([
+                    ['title' => 'Confirmation de votre email', 'body' => 'Un lien vous est envoyé par email : il active votre compte.'],
                     ['title' => 'Paiement sécurisé par Stripe', 'body' => 'Carte ou prélèvement SEPA. Ajoutez votre numéro de TVA intracommunautaire pour une facture en autoliquidation.'],
-                    ['title' => 'Confirmation de votre email', 'body' => 'Un lien vous est envoyé : il ouvre l’accès à votre espace label.'],
                     ['title' => 'Essai de '.$trialDays.' jours', 'body' => 'Annulable à tout moment depuis la page Facturation, sans frais.'],
                 ] as $step)
                     <li class="grid grid-cols-[2rem_1fr] gap-3">

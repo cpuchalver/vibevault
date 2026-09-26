@@ -13,25 +13,31 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\ExceptionInterface as StripeException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Post-signup screens: Checkout confirmation and payment resumption
- * (after a cancelled or failed Checkout). Owner-only.
+ * Payment screens reached from the label panel's subscription requirement:
+ * payment page, Stripe Checkout and the Checkout return page. Owner-only.
  */
 class SignupsController
 {
     public function __construct(protected LabelSubscriptionService $subscriptions) {}
 
-    public function completed(Label $label): View
+    /**
+     * Checkout return page. The subscription is recorded by the Stripe
+     * webhook, which may arrive a few seconds after the customer: until then
+     * the page refreshes itself, then hands over to the dashboard.
+     */
+    public function completed(Label $label): View|RedirectResponse
     {
         Gate::authorize('manageBilling', $label);
 
-        return view('signup.completed', [
-            'label' => $label,
-            'panelUrl' => Filament::getPanel('label')->getUrl($label),
-        ]);
+        if ($label->hasActiveSubscription()) {
+            return redirect()->away(Filament::getPanel('label')->getUrl($label));
+        }
+
+        return view('signup.completed', ['label' => $label]);
     }
 
     public function payment(Request $request, Label $label): View|RedirectResponse
@@ -64,7 +70,7 @@ class SignupsController
                 successUrl: route('signup.completed', ['label' => $label->slug]),
                 cancelUrl: route('signup.payment', ['label' => $label->slug]),
             );
-        } catch (ApiErrorException $exception) {
+        } catch (StripeException $exception) {
             Log::error('Stripe Checkout creation failed.', [
                 'label_id' => $label->getKey(),
                 'stripe_error' => $exception->getMessage(),

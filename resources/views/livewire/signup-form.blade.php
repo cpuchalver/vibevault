@@ -9,7 +9,7 @@
         </div>
 
         <div class="mt-6 flex flex-col-reverse items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-xs leading-relaxed text-slate">Vous allez être redirigé vers Stripe pour enregistrer votre moyen de paiement.</p>
+            <p class="text-xs leading-relaxed text-slate">Vous accédez ensuite à votre tableau de bord pour confirmer votre email et activer l’essai.</p>
             <button
                 type="submit"
                 wire:loading.attr="disabled"

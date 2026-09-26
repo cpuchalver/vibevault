@@ -12,6 +12,7 @@ use App\Models\DemoRequest;
 use App\Models\User;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -21,7 +22,6 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Password;
@@ -29,11 +29,12 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Stripe\Exception\ApiErrorException;
 
 /**
  * Public signup: creates the owner account and the label, signs the owner
- * in, then hands over to Stripe Checkout for the trial and payment method.
+ * in and sends them to the label dashboard. No Stripe call happens here: the
+ * panel first asks for email verification, then its subscription requirement
+ * leads the owner to Stripe Checkout (trial, payment method).
  *
  * Anonymous endpoint: rate limited per IP (hashed), honeypot, minimum fill
  * time. No card data ever reaches the application.
@@ -158,24 +159,7 @@ class SignupForm extends Component implements HasActions, HasSchemas
         Auth::login($label->owner());
         session()->regenerate();
 
-        try {
-            $checkout = $subscriptions->checkout(
-                $label,
-                successUrl: route('signup.completed', ['label' => $label->slug]),
-                cancelUrl: route('signup.payment', ['label' => $label->slug]),
-            );
-        } catch (ApiErrorException $exception) {
-            Log::error('Stripe Checkout creation failed during signup.', [
-                'label_id' => $label->getKey(),
-                'stripe_error' => $exception->getMessage(),
-            ]);
-
-            $this->redirectRoute('signup.payment', ['label' => $label->slug, 'erreur' => 1]);
-
-            return;
-        }
-
-        $this->redirect($checkout->url);
+        $this->redirect(Filament::getPanel(User::LabelPanel)->getUrl($label));
     }
 
     public function render(): View
