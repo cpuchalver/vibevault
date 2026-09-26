@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Billing\StripeBillingProvider;
 use App\Filament\Label\Tenancy\EditLabelProfile;
 use App\Filament\Label\Tenancy\RegisterLabel;
 use App\Models\Label;
@@ -40,6 +41,9 @@ class LabelPanelProvider extends PanelProvider
             ->tenant(Label::class, slugAttribute: 'slug', ownershipRelationship: 'label')
             ->tenantRegistration(RegisterLabel::class)
             ->tenantProfile(EditLabelProfile::class)
+            ->tenantBillingProvider(new StripeBillingProvider)
+            ->tenantBillingRouteSlug('facturation')
+            ->requiresTenantSubscription()
             ->colors([
                 'primary' => Color::Violet,
             ])

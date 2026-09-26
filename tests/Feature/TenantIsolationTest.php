@@ -8,6 +8,7 @@ use App\Models\Band;
 use App\Models\Label;
 use App\Models\Release;
 use App\Models\User;
+use Filament\Facades\Filament;
 
 beforeEach(function (): void {
     $this->member = User::factory()->create();
@@ -68,13 +69,30 @@ it('refuses the label panel to users without membership', function (): void {
         ->assertForbidden();
 });
 
-it('refuses the label panel to unverified users', function (): void {
+it('keeps unverified users out of label data until they verify their email', function (string $path): void {
     $unverified = User::factory()->unverified()->create();
     $this->ownLabel->members()->attach($unverified, ['role' => LabelRole::Owner]);
 
     $this->actingAs($unverified)
-        ->get("/label/{$this->ownLabel->slug}")
-        ->assertForbidden();
+        ->get("/label/{$this->ownLabel->slug}{$path}")
+        ->assertRedirect(route('filament.label.auth.email-verification.prompt'));
+})->with([
+    'dashboard' => '',
+    'releases' => '/releases',
+    'artists' => '/artists',
+]);
+
+it('lets an unverified member verify their email through the signed link', function (): void {
+    $unverified = User::factory()->unverified()->create();
+    $this->ownLabel->members()->attach($unverified, ['role' => LabelRole::Owner]);
+
+    $verificationUrl = Filament::getPanel('label')->getVerifyEmailUrl($unverified);
+
+    $this->actingAs($unverified)
+        ->get($verificationUrl)
+        ->assertRedirect();
+
+    expect($unverified->fresh()->hasVerifiedEmail())->toBeTrue();
 });
 
 it('refuses to persist a release whose band belongs to another label', function (): void {
