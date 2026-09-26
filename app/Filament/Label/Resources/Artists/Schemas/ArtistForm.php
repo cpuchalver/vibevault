@@ -6,6 +6,7 @@ namespace App\Filament\Label\Resources\Artists\Schemas;
 
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -27,6 +28,13 @@ class ArtistForm
                             ->length(2)
                             ->regex('/^[A-Z]{2}$/')
                             ->dehydrateStateUsing(fn (?string $state): ?string => $state ? strtoupper($state) : null),
+                        Toggle::make('create_solo_project')
+                            ->label(__('Créer aussi son projet solo'))
+                            ->helperText(__('Une sortie est toujours liée à un groupe : le projet solo permet de publier sous le nom de l\'artiste.'))
+                            ->default(true)
+                            ->dehydrated(false)
+                            ->visibleOn('create')
+                            ->columnSpanFull(),
                         Textarea::make('biography')
                             ->label(__('Biographie'))
                             ->rows(5)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Label\Resources\Bands\RelationManagers;
 
+use App\Enums\BandType;
 use App\Models\Band;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
@@ -12,6 +13,7 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -19,6 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
@@ -84,6 +87,8 @@ class MembersRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->authorize(fn (): bool => $this->canManageMembers())
+                    // A solo project has exactly one member.
+                    ->visible(fn (): bool => ! ($this->isSoloBand() && $this->membersCount() >= 1))
                     ->recordSelectOptionsQuery(fn (Builder $query): Builder => $query
                         ->where('artists.label_id', $this->getOwnerRecord()->label_id))
                     ->recordSelectSearchColumns(['name'])
@@ -97,14 +102,44 @@ class MembersRelationManager extends RelationManager
                 EditAction::make()
                     ->authorize(fn (): bool => $this->canManageMembers()),
                 DetachAction::make()
-                    ->authorize(fn (): bool => $this->canManageMembers()),
+                    ->authorize(fn (): bool => $this->canManageMembers())
+                    // A band always keeps at least one member.
+                    ->visible(fn (): bool => $this->membersCount() > 1),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
-                        ->authorize(fn (): bool => $this->canManageMembers()),
+                        ->authorize(fn (): bool => $this->canManageMembers())
+                        ->before(function (DetachBulkAction $action, Collection $records): void {
+                            if ($records->count() < $this->membersCount()) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->danger()
+                                ->title(__('Un groupe doit garder au moins un membre.'))
+                                ->send();
+
+                            $action->halt();
+                        }),
                 ]),
             ]);
+    }
+
+    /**
+     * Memoized for the request: evaluated once, not once per table row.
+     */
+    protected function membersCount(): int
+    {
+        return once(fn (): int => $this->getOwnerRecord()->members()->count());
+    }
+
+    protected function isSoloBand(): bool
+    {
+        /** @var Band $band */
+        $band = $this->getOwnerRecord();
+
+        return $band->type === BandType::Solo;
     }
 
     protected function canManageMembers(): bool
