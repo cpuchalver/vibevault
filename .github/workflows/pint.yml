@@ -1,0 +1,68 @@
+name: Pint
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - '**.php'
+      - 'pint.json'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/pint.yml'
+
+# Least privilege: only this job may write to the repository contents.
+permissions:
+  contents: read
+
+# Avoid two Pint runs racing to push on the same branch.
+concurrency:
+  group: pint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pint:
+    name: Format code with Laravel Pint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      # --no-scripts: formatting needs no app bootstrap, secrets or .env.
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint
+
+      # Commits made with GITHUB_TOKEN do not trigger new workflow runs (no loop).
+      - name: Commit formatting changes
+        uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: 'style: apply Laravel Pint formatting'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: '41898282+github-actions[bot]@users.noreply.github.com'
