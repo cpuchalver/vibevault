@@ -1,25 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Enums\LabelRole;
+use App\Models\Artist;
+use App\Models\Label;
+use App\Models\Release;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
+/**
+ * Local demo data: two isolated labels, their staff and one artist portal account each.
+ * All accounts use the password "password". Never run outside local/testing.
+ */
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (! app()->environment(['local', 'testing'])) {
+            throw new RuntimeException('Demo seeding is only allowed in local/testing environments.');
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach (['nova' => 'Nova Records', 'echo' => 'Echo Music'] as $key => $labelName) {
+            $owner = User::factory()->create(['name' => "Owner {$labelName}", 'email' => "owner@{$key}.test"]);
+            $viewer = User::factory()->create(['name' => "Viewer {$labelName}", 'email' => "viewer@{$key}.test"]);
+
+            $label = Label::factory()
+                ->withMember($owner, LabelRole::Owner)
+                ->withMember($viewer, LabelRole::Viewer)
+                ->create(['name' => $labelName]);
+
+            Artist::factory()
+                ->count(4)
+                ->for($label)
+                ->create()
+                ->each(function (Artist $artist): void {
+                    Release::factory()->count(3)->forArtist($artist)->create();
+                    Release::factory()->forArtist($artist)->draft()->create();
+                });
+
+            $portalUser = User::factory()->create(['name' => "Artist {$labelName}", 'email' => "artist@{$key}.test"]);
+            $label->artists()->first()->users()->attach($portalUser);
+        }
     }
 }
