@@ -10,9 +10,11 @@ use App\Filament\Label\Resources\Bands\RelationManagers\MembersRelationManager;
 use App\Models\Artist;
 use App\Models\Band;
 use App\Models\Label;
+use App\Models\Release;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Database\QueryException;
 use Livewire\Livewire;
 
 function actingInLabel(User $user, Label $label): void
@@ -134,3 +136,9 @@ it('denies band abilities on another label even to an owner', function (): void 
         ->and($owner->can('update', $this->band))->toBeFalse()
         ->and($owner->can('manageMembers', $this->band))->toBeFalse();
 });
+
+it('refuses to hard-delete a band that still has releases', function (): void {
+    Release::factory()->forBand($this->band)->create();
+
+    $this->band->forceDelete();
+})->throws(QueryException::class);

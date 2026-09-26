@@ -34,21 +34,21 @@ class DatabaseSeeder extends Seeder
                 ->withMember($viewer, LabelRole::Viewer)
                 ->create(['name' => $labelName]);
 
-            $artists = Artist::factory()
-                ->count(4)
-                ->for($label)
-                ->create()
-                ->each(function (Artist $artist): void {
-                    Release::factory()->count(3)->forArtist($artist)->create();
-                    Release::factory()->forArtist($artist)->draft()->create();
-                });
+            $artists = Artist::factory()->count(4)->for($label)->create();
 
-            // The second artist plays in both bands.
-            Band::factory()->for($label)->withMembers($artists->take(3))->create();
-            Band::factory()->for($label)->withMembers($artists->slice(1, 2))->create();
+            // Every artist has a solo project; the second artist also plays in both bands.
+            $bands = $artists
+                ->map(fn (Artist $artist): Band => Band::factory()->solo($artist)->create())
+                ->push(Band::factory()->for($label)->withMembers($artists->take(3))->create())
+                ->push(Band::factory()->for($label)->withMembers($artists->slice(1, 2))->create());
+
+            $bands->each(function (Band $band): void {
+                Release::factory()->count(2)->forBand($band)->create();
+                Release::factory()->forBand($band)->draft()->create();
+            });
 
             $portalUser = User::factory()->create(['name' => "Artist {$labelName}", 'email' => "artist@{$key}.test"]);
-            $label->artists()->first()->users()->attach($portalUser);
+            $artists->get(1)->users()->attach($portalUser);
         }
     }
 }

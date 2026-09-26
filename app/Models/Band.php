@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -59,5 +60,13 @@ class Band extends Model
             ->using(BandMembership::class)
             ->withPivot(['id', 'role', 'joined_on', 'left_on'])
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<Release, $this>
+     */
+    public function releases(): HasMany
+    {
+        return $this->hasMany(Release::class);
     }
 }

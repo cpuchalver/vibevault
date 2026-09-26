@@ -10,11 +10,11 @@ use Database\Factories\ArtistFactory;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -53,7 +53,7 @@ class Artist extends Model implements HasName
     }
 
     /**
-     * Groups this artist plays in (a single artist can belong to several groups).
+     * Bands this artist plays in (a single artist can belong to several bands).
      *
      * @return BelongsToMany<Band, $this, BandMembership>
      */
@@ -66,11 +66,13 @@ class Artist extends Model implements HasName
     }
 
     /**
-     * @return HasMany<Release, $this>
+     * Releases credited to any band this artist is (or was) a member of.
+     *
+     * @return Builder<Release>
      */
-    public function releases(): HasMany
+    public function releasesQuery(): Builder
     {
-        return $this->hasMany(Release::class);
+        return Release::query()->creditedToArtist($this);
     }
 
     public function getFilamentName(): string

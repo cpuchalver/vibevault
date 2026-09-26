@@ -8,8 +8,10 @@ use App\Filament\Artist\Resources\Releases\Pages\ListReleases;
 use App\Filament\Artist\Resources\Releases\Pages\ViewRelease;
 use App\Filament\Artist\Resources\Releases\Schemas\ReleaseInfolist;
 use App\Filament\Artist\Resources\Releases\Tables\ReleasesTable;
+use App\Models\Artist;
 use App\Models\Release;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,10 +20,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Read-only view of the current artist's releases in the artist portal.
+ * Read-only view, in the artist portal, of the releases of every band the
+ * current artist is (or was) a member of.
  *
- * Three layers of isolation:
- *  1. Filament tenancy scopes the query to the current artist (`artist` ownership relationship).
+ * Releases have no direct ownership relationship to an artist, so Filament's
+ * automatic tenant scoping is disabled and replaced by an explicit scope:
+ *  1. The query is restricted to the current artist's bands (fail closed without a tenant).
  *  2. Drafts are excluded at query level (label-internal work in progress).
  *  3. ReleasePolicy re-checks every record; write abilities are hard-disabled here.
  */
@@ -29,7 +33,7 @@ class ReleaseResource extends Resource
 {
     protected static ?string $model = Release::class;
 
-    protected static bool $isScopedToTenant = true;
+    protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMusicalNote;
 
@@ -47,7 +51,16 @@ class ReleaseResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->visibleToArtists();
+        $artist = Filament::getTenant();
+
+        if (! $artist instanceof Artist) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
+        return parent::getEloquentQuery()
+            ->creditedToArtist($artist)
+            ->visibleToArtists()
+            ->with('band');
     }
 
     public static function canCreate(): bool

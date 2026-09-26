@@ -22,7 +22,7 @@ class ArtistsTable
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with('bands')
-                ->withCount(['releases', 'users']))
+                ->withCount('users'))
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
@@ -38,10 +38,6 @@ class ArtistsTable
                     ->placeholder('—')
                     ->limitList(3)
                     ->expandableLimitedList(),
-                TextColumn::make('releases_count')
-                    ->label(__('Sorties'))
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('users_count')
                     ->label(__('Comptes portail'))
                     ->numeric()

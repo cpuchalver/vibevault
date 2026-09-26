@@ -8,6 +8,7 @@ use Filament\Support\Contracts\HasLabel;
 
 enum BandType: string implements HasLabel
 {
+    case Solo = 'solo';
     case Band = 'band';
     case Duo = 'duo';
     case Collective = 'collective';
@@ -17,6 +18,7 @@ enum BandType: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
+            self::Solo => __('Projet solo'),
             self::Band => __('Groupe'),
             self::Duo => __('Duo'),
             self::Collective => __('Collectif'),

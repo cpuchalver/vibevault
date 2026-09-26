@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\BandType;
 use App\Enums\ReleaseStatus;
 use App\Enums\ReleaseType;
 use App\Policies\ReleasePolicy;
@@ -19,13 +20,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use LogicException;
 
 /**
- * A release (single, EP, album…) owned by a label and credited to one of its artists.
+ * A release (single, EP, album…) owned by a label and credited to one of its bands.
+ * A solo artist releases through a band of type {@see BandType::Solo}.
  *
  * `label_id` is not fillable: it is set from the tenant. An integrity guard
- * refuses to persist a release whose artist belongs to another label.
+ * refuses to persist a release whose band belongs to another label.
  */
 #[UsePolicy(ReleasePolicy::class)]
-#[Fillable(['artist_id', 'title', 'type', 'status', 'upc', 'catalog_number', 'release_date'])]
+#[Fillable(['band_id', 'title', 'type', 'status', 'upc', 'catalog_number', 'release_date'])]
 class Release extends Model
 {
     /** @use HasFactory<ReleaseFactory> */
@@ -36,13 +38,13 @@ class Release extends Model
     protected static function booted(): void
     {
         static::saving(function (Release $release): void {
-            $artistLabelId = Artist::query()
+            $bandLabelId = Band::query()
                 ->withoutGlobalScopes()
-                ->whereKey($release->artist_id)
+                ->whereKey($release->band_id)
                 ->value('label_id');
 
-            if ($artistLabelId === null || (int) $artistLabelId !== (int) $release->label_id) {
-                throw new LogicException('A release must belong to the same label as its artist.');
+            if ($bandLabelId === null || (int) $bandLabelId !== (int) $release->label_id) {
+                throw new LogicException('A release must belong to the same label as its band.');
             }
         });
     }
@@ -65,11 +67,11 @@ class Release extends Model
     }
 
     /**
-     * @return BelongsTo<Artist, $this>
+     * @return BelongsTo<Band, $this>
      */
-    public function artist(): BelongsTo
+    public function band(): BelongsTo
     {
-        return $this->belongsTo(Artist::class);
+        return $this->belongsTo(Band::class);
     }
 
     /**
@@ -79,6 +81,19 @@ class Release extends Model
     protected function visibleToArtists(Builder $query): void
     {
         $query->whereIn('status', ReleaseStatus::visibleToArtists());
+    }
+
+    /**
+     * Releases of every band the artist is (or was) a member of.
+     *
+     * @param  Builder<Release>  $query
+     */
+    #[Scope]
+    protected function creditedToArtist(Builder $query, Artist|int $artist): void
+    {
+        $artistId = $artist instanceof Artist ? $artist->getKey() : $artist;
+
+        $query->whereIn('band_id', BandMembership::query()->select('band_id')->where('artist_id', $artistId));
     }
 
     public function isVisibleToArtists(): bool

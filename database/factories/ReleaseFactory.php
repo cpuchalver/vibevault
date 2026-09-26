@@ -6,7 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\ReleaseStatus;
 use App\Enums\ReleaseType;
-use App\Models\Artist;
+use App\Models\Band;
 use App\Models\Release;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,10 +18,10 @@ class ReleaseFactory extends Factory
     public function definition(): array
     {
         return [
-            'artist_id' => Artist::factory(),
-            'label_id' => fn (array $attributes): int => Artist::query()
+            'band_id' => Band::factory(),
+            'label_id' => fn (array $attributes): int => Band::query()
                 ->withoutGlobalScopes()
-                ->findOrFail($attributes['artist_id'])
+                ->findOrFail($attributes['band_id'])
                 ->label_id,
             'title' => fake()->sentence(3),
             'type' => fake()->randomElement(ReleaseType::cases()),
@@ -32,11 +32,11 @@ class ReleaseFactory extends Factory
         ];
     }
 
-    public function forArtist(Artist $artist): static
+    public function forBand(Band $band): static
     {
         return $this->state([
-            'artist_id' => $artist->getKey(),
-            'label_id' => $artist->label_id,
+            'band_id' => $band->getKey(),
+            'label_id' => $band->label_id,
         ]);
     }
 

@@ -22,6 +22,9 @@ class ReleasesTable
                     ->label(__('Titre'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('band.name')
+                    ->label(__('Groupe'))
+                    ->sortable(),
                 TextColumn::make('type')
                     ->label(__('Format'))
                     ->badge(),

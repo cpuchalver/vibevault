@@ -27,6 +27,15 @@ class BandFactory extends Factory
         ];
     }
 
+    public function solo(Artist $artist): static
+    {
+        return $this->state([
+            'label_id' => $artist->label_id,
+            'name' => $artist->name,
+            'type' => BandType::Solo,
+        ])->afterCreating(fn (Band $band) => $band->members()->attach($artist));
+    }
+
     /**
      * @param  iterable<Artist>  $artists
      */
