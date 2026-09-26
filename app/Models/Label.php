@@ -50,6 +50,14 @@ class Label extends Model implements HasName
     }
 
     /**
+     * @return HasMany<MusicGroup, $this>
+     */
+    public function musicGroups(): HasMany
+    {
+        return $this->hasMany(MusicGroup::class);
+    }
+
+    /**
      * @return HasMany<Release, $this>
      */
     public function releases(): HasMany
