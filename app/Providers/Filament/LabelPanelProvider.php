@@ -32,6 +32,7 @@ class LabelPanelProvider extends PanelProvider
             ->id('label')
             ->path('label')
             ->brandName('VibeVault')
+            ->databaseTransactions()
             ->login()
             ->passwordReset()
             ->emailVerification()

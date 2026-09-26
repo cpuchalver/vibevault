@@ -29,6 +29,7 @@ class ArtistPanelProvider extends PanelProvider
             ->id('artist')
             ->path('artist')
             ->brandName('VibeVault')
+            ->databaseTransactions()
             ->login()
             ->passwordReset()
             ->emailVerification()

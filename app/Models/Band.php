@@ -16,10 +16,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use LogicException;
 
 /**
- * A band of a label, made of several artists. Covers every kind of ensemble
- * (duo, collective, orchestra…) through {@see BandType}.
+ * A band of a label, made of one or several artists. Covers every kind of
+ * ensemble (solo project, duo, collective, orchestra…) through {@see BandType}.
+ *
+ * Business rules: Label 1 ── n Band, Band n ── n Artist (at least one member,
+ * exactly one for a solo project). Membership rules live in {@see BandMembership}.
  *
  * `label_id` is not fillable: it is set from the tenant.
  */
@@ -33,6 +37,15 @@ class Band extends Model
     use HasFactory;
 
     use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saving(function (Band $band): void {
+            if ($band->type === BandType::Solo && $band->exists && $band->members()->count() > 1) {
+                throw new LogicException('A band with several members cannot be a solo project.');
+            }
+        });
+    }
 
     protected function casts(): array
     {

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use LogicException;
 
 /**
  * An artist signed to a label. Also the tenant of the artist portal.
@@ -33,6 +34,24 @@ class Artist extends Model implements HasName
     use HasFactory;
 
     use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        // A hard delete cascades memberships at database level: refuse it when it
+        // would leave a band without any member.
+        static::forceDeleting(function (Artist $artist): void {
+            $leavesEmptyBand = BandMembership::query()
+                ->whereIn('band_id', BandMembership::query()->select('band_id')->where('artist_id', $artist->getKey()))
+                ->selectRaw('band_id, count(*) as members_count')
+                ->groupBy('band_id')
+                ->havingRaw('count(*) = 1')
+                ->exists();
+
+            if ($leavesEmptyBand) {
+                throw new LogicException('This artist is the only member of a band and cannot be permanently deleted.');
+            }
+        });
+    }
 
     /**
      * @return BelongsTo<Label, $this>
