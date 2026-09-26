@@ -22,7 +22,9 @@ class BandsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('members'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->with('members')
+                ->withCount('releases'))
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
@@ -37,6 +39,10 @@ class BandsTable
                     ->badge()
                     ->limitList(4)
                     ->expandableLimitedList(),
+                TextColumn::make('releases_count')
+                    ->label(__('Sorties'))
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('formed_on')
                     ->label(__('Formation'))
                     ->date()

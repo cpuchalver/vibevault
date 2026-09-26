@@ -24,15 +24,15 @@ class ReleasesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('artist'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('band'))
             ->defaultSort('release_date', 'desc')
             ->columns([
                 TextColumn::make('title')
                     ->label(__('Titre'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('artist.name')
-                    ->label(__('Artiste'))
+                TextColumn::make('band.name')
+                    ->label(__('Groupe'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('type')
@@ -61,10 +61,10 @@ class ReleasesTable
                 SelectFilter::make('type')
                     ->label(__('Format'))
                     ->options(ReleaseType::class),
-                SelectFilter::make('artist')
-                    ->label(__('Artiste'))
+                SelectFilter::make('band')
+                    ->label(__('Groupe'))
                     ->relationship(
-                        'artist',
+                        'band',
                         'name',
                         fn (Builder $query): Builder => $query->whereBelongsTo(Filament::getTenant()),
                     )

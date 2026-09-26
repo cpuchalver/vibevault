@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\LabelPermission;
+use App\Models\BandMembership;
 use App\Models\Release;
 use App\Models\User;
 
@@ -31,7 +32,17 @@ class ReleasePolicy
             return true;
         }
 
-        return $user->isLinkedToArtist($release->artist_id) && $release->isVisibleToArtists();
+        if (! $release->isVisibleToArtists()) {
+            return false;
+        }
+
+        $linkedArtistIds = $user->artists->modelKeys();
+
+        return $linkedArtistIds !== []
+            && BandMembership::query()
+                ->where('band_id', $release->band_id)
+                ->whereIn('artist_id', $linkedArtistIds)
+                ->exists();
     }
 
     public function create(User $user): bool

@@ -18,7 +18,7 @@ class ReleaseInfolist
                     ->columns(3)
                     ->schema([
                         TextEntry::make('title')->label(__('Titre')),
-                        TextEntry::make('artist.name')->label(__('Artiste principal')),
+                        TextEntry::make('band.name')->label(__('Groupe')),
                         TextEntry::make('type')->label(__('Format'))->badge(),
                         TextEntry::make('status')->label(__('Statut'))->badge(),
                         TextEntry::make('release_date')->label(__('Date de sortie'))->date()->placeholder('—'),
