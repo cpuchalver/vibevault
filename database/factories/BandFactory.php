@@ -6,8 +6,8 @@ namespace Database\Factories;
 
 use App\Enums\BandType;
 use App\Models\Artist;
-use App\Models\Label;
 use App\Models\Band;
+use App\Models\Label;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,6 +25,15 @@ class BandFactory extends Factory
             'formed_on' => fake()->dateTimeBetween('-15 years', '-1 year'),
             'biography' => fake()->paragraph(),
         ];
+    }
+
+    public function solo(Artist $artist): static
+    {
+        return $this->state([
+            'label_id' => $artist->label_id,
+            'name' => $artist->name,
+            'type' => BandType::Solo,
+        ])->afterCreating(fn (Band $band) => $band->members()->attach($artist));
     }
 
     /**

@@ -16,7 +16,7 @@ class CreateRelease extends CreateRecord
 
     /**
      * The owning label is attached explicitly from the tenant (never from user
-     * input) *before* saving, so the model's label/artist integrity guard can
+     * input) *before* saving, so the model's label/band integrity guard can
      * validate the pair on the very first write.
      *
      * @param  array<string, mixed>  $data

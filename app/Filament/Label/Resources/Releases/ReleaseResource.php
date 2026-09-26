@@ -85,7 +85,7 @@ class ReleaseResource extends Resource
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
-            ->with('artist')
+            ->with('band')
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

@@ -6,7 +6,7 @@ namespace App\Filament\Label\Resources\Releases\Schemas;
 
 use App\Enums\ReleaseStatus;
 use App\Enums\ReleaseType;
-use App\Models\Artist;
+use App\Models\Band;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -28,16 +28,17 @@ class ReleaseForm
                             ->label(__('Titre'))
                             ->required()
                             ->maxLength(200),
-                        Select::make('artist_id')
-                            ->label(__('Artiste principal'))
+                        Select::make('band_id')
+                            ->label(__('Groupe'))
+                            ->helperText(__('Un artiste solo sort ses disques via un groupe de type « Projet solo ».'))
                             ->relationship(
-                                name: 'artist',
+                                name: 'band',
                                 titleAttribute: 'name',
                                 modifyQueryUsing: fn (Builder $query): Builder => $query->whereBelongsTo(Filament::getTenant()),
                             )
                             // Defense in depth: never trust the submitted id, re-check it belongs to this label.
                             ->scopedExists(
-                                model: Artist::class,
+                                model: Band::class,
                                 column: 'id',
                                 modifyQueryUsing: fn (Builder $query): Builder => $query
                                     ->whereBelongsTo(Filament::getTenant())

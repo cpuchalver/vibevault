@@ -7,7 +7,7 @@ use App\Enums\ReleaseStatus;
 use App\Enums\ReleaseType;
 use App\Filament\Label\Resources\Releases\Pages\CreateRelease;
 use App\Filament\Label\Resources\Releases\Pages\EditRelease;
-use App\Models\Artist;
+use App\Models\Band;
 use App\Models\Label;
 use App\Models\Release;
 use App\Models\User;
@@ -35,7 +35,7 @@ it('forbids viewers from opening the create page', function (): void {
 it('forbids viewers from editing a release', function (): void {
     $viewer = User::factory()->create();
     $label = Label::factory()->withMember($viewer, LabelRole::Viewer)->create();
-    $release = Release::factory()->forArtist(Artist::factory()->for($label)->create())->create();
+    $release = Release::factory()->forBand(Band::factory()->for($label)->create())->create();
 
     $this->actingAs($viewer)
         ->get("/label/{$label->slug}/releases/{$release->getKey()}/edit")
@@ -45,14 +45,14 @@ it('forbids viewers from editing a release', function (): void {
 it('lets catalog managers create a release attached to the current label', function (): void {
     $manager = User::factory()->create();
     $label = Label::factory()->withMember($manager, LabelRole::CatalogManager)->create();
-    $artist = Artist::factory()->for($label)->create();
+    $band = Band::factory()->for($label)->create();
 
     actingInLabelPanel($manager, $label);
 
     Livewire::test(CreateRelease::class)
         ->fillForm([
             'title' => 'New Album',
-            'artist_id' => $artist->getKey(),
+            'band_id' => $band->getKey(),
             'type' => ReleaseType::Album,
             'status' => ReleaseStatus::Draft,
         ])
@@ -61,43 +61,43 @@ it('lets catalog managers create a release attached to the current label', funct
 
     expect(Release::query()->withoutGlobalScopes()->firstWhere('title', 'New Album'))
         ->label_id->toBe($label->getKey())
-        ->artist_id->toBe($artist->getKey());
+        ->band_id->toBe($band->getKey());
 });
 
-it('rejects an artist from another label submitted in the form', function (): void {
+it('rejects a band from another label submitted in the form', function (): void {
     $manager = User::factory()->create();
     $label = Label::factory()->withMember($manager, LabelRole::CatalogManager)->create();
-    $foreignArtist = Artist::factory()->create();
+    $foreignBand = Band::factory()->create();
 
     actingInLabelPanel($manager, $label);
 
     Livewire::test(CreateRelease::class)
         ->fillForm([
             'title' => 'Hijack',
-            'artist_id' => $foreignArtist->getKey(),
+            'band_id' => $foreignBand->getKey(),
             'type' => ReleaseType::Single,
             'status' => ReleaseStatus::Draft,
         ])
         ->call('create')
-        ->assertHasFormErrors(['artist_id']);
+        ->assertHasFormErrors(['band_id']);
 
     expect(Release::query()->withoutGlobalScopes()->where('title', 'Hijack')->exists())->toBeFalse();
 });
 
-it('rejects moving an existing release to an artist of another label', function (): void {
+it('rejects moving an existing release to a band of another label', function (): void {
     $manager = User::factory()->create();
     $label = Label::factory()->withMember($manager, LabelRole::CatalogManager)->create();
-    $release = Release::factory()->forArtist(Artist::factory()->for($label)->create())->create();
-    $foreignArtist = Artist::factory()->create();
+    $release = Release::factory()->forBand(Band::factory()->for($label)->create())->create();
+    $foreignBand = Band::factory()->create();
 
     actingInLabelPanel($manager, $label);
 
     Livewire::test(EditRelease::class, ['record' => $release->getKey()])
-        ->fillForm(['artist_id' => $foreignArtist->getKey()])
+        ->fillForm(['band_id' => $foreignBand->getKey()])
         ->call('save')
-        ->assertHasFormErrors(['artist_id']);
+        ->assertHasFormErrors(['band_id']);
 
-    expect($release->fresh()->artist_id)->not->toBe($foreignArtist->getKey());
+    expect($release->fresh()->band_id)->not->toBe($foreignBand->getKey());
 });
 
 it('denies record-less abilities outside of a tenant context', function (): void {
