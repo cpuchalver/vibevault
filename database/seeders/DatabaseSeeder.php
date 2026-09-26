@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Enums\LabelRole;
 use App\Models\Artist;
 use App\Models\Label;
+use App\Models\MusicGroup;
 use App\Models\Release;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -33,7 +34,7 @@ class DatabaseSeeder extends Seeder
                 ->withMember($viewer, LabelRole::Viewer)
                 ->create(['name' => $labelName]);
 
-            Artist::factory()
+            $artists = Artist::factory()
                 ->count(4)
                 ->for($label)
                 ->create()
@@ -41,6 +42,10 @@ class DatabaseSeeder extends Seeder
                     Release::factory()->count(3)->forArtist($artist)->create();
                     Release::factory()->forArtist($artist)->draft()->create();
                 });
+
+            // The second artist plays in both groups.
+            MusicGroup::factory()->for($label)->withMembers($artists->take(3))->create();
+            MusicGroup::factory()->for($label)->withMembers($artists->slice(1, 2))->create();
 
             $portalUser = User::factory()->create(['name' => "Artist {$labelName}", 'email' => "artist@{$key}.test"]);
             $label->artists()->first()->users()->attach($portalUser);
