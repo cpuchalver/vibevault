@@ -13,4 +13,3 @@
 @import '../../vendor/filament/notifications/resources/css/index.css';
 @import '../../vendor/filament/schemas/resources/css/index.css';
 
-@variant dark (&:where(.dark, .dark *));

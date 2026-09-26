@@ -30,6 +30,9 @@
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:locale" content="fr_FR">
 
+        <meta name="color-scheme" content="light dark">
+        <x-marketing.theme-script />
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -40,7 +43,7 @@
         @endif
     </head>
     <body class="min-h-screen font-sans antialiased">
-        <a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">
+        <a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
             Aller au contenu
         </a>
 
@@ -51,34 +54,38 @@
                     <span class="font-display text-lg font-bold tracking-tight">VibeVault</span>
                 </a>
 
-                <nav aria-label="Navigation principale" class="hidden items-center gap-8 md:flex">
-                    @foreach($navigation as $item)
-                        <a
-                            href="{{ route($item['route']) }}"
-                            @class([
-                                'text-sm font-medium transition-colors hover:text-signal',
-                                'text-signal' => request()->routeIs($item['route']),
-                                'text-ink-soft' => ! request()->routeIs($item['route']),
-                            ])
-                            @if(request()->routeIs($item['route'])) aria-current="page" @endif
-                        >{{ $item['label'] }}</a>
-                    @endforeach
-                    <a href="{{ route('demo') }}" class="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-signal">
-                        Demander une démo
-                    </a>
-                </nav>
-
-                <details class="group relative md:hidden">
-                    <summary class="flex cursor-pointer list-none items-center rounded-md border border-rule px-3 py-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden">
-                        Menu
-                    </summary>
-                    <nav aria-label="Navigation mobile" class="absolute right-0 mt-2 flex w-56 flex-col gap-1 rounded-lg border border-rule bg-white p-2 shadow-lg">
+                <div class="flex items-center gap-3 md:gap-6">
+                    <nav aria-label="Navigation principale" class="hidden items-center gap-8 md:flex">
                         @foreach($navigation as $item)
-                            <a href="{{ route($item['route']) }}" class="rounded px-3 py-2 text-sm hover:bg-paper">{{ $item['label'] }}</a>
+                            <a
+                                href="{{ route($item['route']) }}"
+                                @class([
+                                    'text-sm font-medium transition-colors hover:text-accent',
+                                    'text-accent' => request()->routeIs($item['route']),
+                                    'text-ink-soft' => ! request()->routeIs($item['route']),
+                                ])
+                                @if(request()->routeIs($item['route'])) aria-current="page" @endif
+                            >{{ $item['label'] }}</a>
                         @endforeach
-                        <a href="{{ route('demo') }}" class="rounded bg-ink px-3 py-2 text-sm font-semibold text-white">Demander une démo</a>
+                        <a href="{{ route('demo') }}" class="rounded-md bg-inverse px-4 py-2 text-sm font-semibold text-on-inverse transition-colors hover:bg-signal hover:text-white">
+                            Demander une démo
+                        </a>
                     </nav>
-                </details>
+
+                    <x-marketing.theme-toggle />
+
+                    <details class="group relative md:hidden">
+                        <summary class="flex cursor-pointer list-none items-center rounded-md border border-rule px-3 py-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden">
+                            Menu
+                        </summary>
+                        <nav aria-label="Navigation mobile" class="absolute right-0 mt-2 flex w-56 flex-col gap-1 rounded-lg border border-rule bg-surface p-2 shadow-lg">
+                            @foreach($navigation as $item)
+                                <a href="{{ route($item['route']) }}" class="rounded px-3 py-2 text-sm hover:bg-paper">{{ $item['label'] }}</a>
+                            @endforeach
+                            <a href="{{ route('demo') }}" class="rounded bg-inverse px-3 py-2 text-sm font-semibold text-on-inverse">Demander une démo</a>
+                        </nav>
+                    </details>
+                </div>
             </div>
         </header>
 
@@ -100,17 +107,17 @@
                 <nav aria-label="Produit">
                     <h2 class="text-sm font-semibold">Produit</h2>
                     <ul class="mt-3 space-y-2 text-sm text-slate">
-                        <li><a href="{{ route('features') }}" class="hover:text-signal">Fonctionnalités</a></li>
-                        <li><a href="{{ route('pricing') }}" class="hover:text-signal">Tarifs</a></li>
-                        <li><a href="{{ route('demo') }}" class="hover:text-signal">Demander une démo</a></li>
+                        <li><a href="{{ route('features') }}" class="hover:text-accent">Fonctionnalités</a></li>
+                        <li><a href="{{ route('pricing') }}" class="hover:text-accent">Tarifs</a></li>
+                        <li><a href="{{ route('demo') }}" class="hover:text-accent">Demander une démo</a></li>
                     </ul>
                 </nav>
                 <nav aria-label="Informations légales">
                     <h2 class="text-sm font-semibold">Informations légales</h2>
                     <ul class="mt-3 space-y-2 text-sm text-slate">
-                        <li><a href="{{ route('legal.notice') }}" class="hover:text-signal">Mentions légales</a></li>
-                        <li><a href="{{ route('legal.privacy') }}" class="hover:text-signal">Politique de confidentialité</a></li>
-                        <li><a href="{{ route('legal.terms') }}" class="hover:text-signal">Conditions générales d’utilisation</a></li>
+                        <li><a href="{{ route('legal.notice') }}" class="hover:text-accent">Mentions légales</a></li>
+                        <li><a href="{{ route('legal.privacy') }}" class="hover:text-accent">Politique de confidentialité</a></li>
+                        <li><a href="{{ route('legal.terms') }}" class="hover:text-accent">Conditions générales d’utilisation</a></li>
                     </ul>
                 </nav>
             </div>

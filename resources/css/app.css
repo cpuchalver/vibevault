@@ -16,7 +16,7 @@
     }
 
     :focus-visible {
-        outline: 2px solid var(--color-signal);
+        outline: 2px solid var(--color-accent);
         outline-offset: 3px;
     }
 
@@ -60,13 +60,13 @@
     }
 
     .prose-legal a {
-        color: var(--color-signal);
+        color: var(--color-accent);
         text-decoration: underline;
     }
 
     .placeholder-value {
-        background-color: #fff4cc;
-        color: #6b4e00;
+        background-color: var(--color-placeholder);
+        color: var(--color-on-placeholder);
         padding: 0 0.25rem;
         border-radius: 0.125rem;
     }

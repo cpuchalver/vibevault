@@ -13,13 +13,13 @@
     $count = fn (int $value): string => number_format($value, 0, ',', "\u{202F}");
 @endphp
 
-<figure {{ $attributes->class('rounded-xl border border-rule bg-white shadow-[0_1px_0_rgba(19,24,58,0.04),0_24px_48px_-24px_rgba(19,24,58,0.25)]') }}>
+<figure {{ $attributes->class('rounded-xl border border-rule bg-surface shadow-[0_1px_0_rgba(19,24,58,0.04),0_24px_48px_-24px_rgba(19,24,58,0.25)] dark:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.7)]') }}>
     <figcaption class="flex items-start justify-between gap-4 border-b border-rule px-5 py-4">
         <div>
             <p class="text-xs text-slate">Relevé de royalties · 2ᵉ trimestre 2026</p>
             <p class="mt-0.5 font-display text-lg font-bold">Nora Vale</p>
         </div>
-        <span class="rounded-full bg-signal/10 px-2.5 py-1 text-xs font-medium text-signal">Publié</span>
+        <span class="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-medium text-accent">Publié</span>
     </figcaption>
 
     <table class="figures w-full text-sm">

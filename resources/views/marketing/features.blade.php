@@ -73,7 +73,7 @@
             <ul class="sticky top-24 space-y-1 border-l border-rule text-sm">
                 @foreach($modules as $module)
                     <li>
-                        <a href="#{{ $module['id'] }}" class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-ink-soft hover:border-signal hover:text-ink">
+                        <a href="#{{ $module['id'] }}" class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-ink-soft hover:border-accent hover:text-ink">
                             {{ $module['title'] }}
                         </a>
                     </li>
