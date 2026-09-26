@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\LabelPermission;
-use App\Models\MusicGroup;
+use App\Models\Band;
 use App\Models\User;
 
 /**
  * Groups are part of the artist roster: same permissions as artists.
  */
-class MusicGroupPolicy
+class BandPolicy
 {
     use ResolvesCurrentTenant;
 
@@ -22,9 +22,9 @@ class MusicGroupPolicy
         return $label !== null && $user->hasLabelPermission($label, LabelPermission::ViewCatalog);
     }
 
-    public function view(User $user, MusicGroup $musicGroup): bool
+    public function view(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ViewCatalog);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ViewCatalog);
     }
 
     public function create(User $user): bool
@@ -34,22 +34,22 @@ class MusicGroupPolicy
         return $label !== null && $user->hasLabelPermission($label, LabelPermission::ManageArtists);
     }
 
-    public function update(User $user, MusicGroup $musicGroup): bool
+    public function update(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ManageArtists);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ManageArtists);
     }
 
     /**
      * Attach, detach and edit memberships (role, tenure).
      */
-    public function manageMembers(User $user, MusicGroup $musicGroup): bool
+    public function manageMembers(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ManageArtists);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ManageArtists);
     }
 
-    public function delete(User $user, MusicGroup $musicGroup): bool
+    public function delete(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ManageArtists);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ManageArtists);
     }
 
     public function deleteAny(User $user): bool
@@ -57,9 +57,9 @@ class MusicGroupPolicy
         return $this->create($user);
     }
 
-    public function restore(User $user, MusicGroup $musicGroup): bool
+    public function restore(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ManageArtists);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ManageArtists);
     }
 
     public function restoreAny(User $user): bool
@@ -67,9 +67,9 @@ class MusicGroupPolicy
         return $this->create($user);
     }
 
-    public function forceDelete(User $user, MusicGroup $musicGroup): bool
+    public function forceDelete(User $user, Band $band): bool
     {
-        return $user->hasLabelPermission($musicGroup->label_id, LabelPermission::ManageLabel);
+        return $user->hasLabelPermission($band->label_id, LabelPermission::ManageLabel);
     }
 
     public function forceDeleteAny(User $user): bool

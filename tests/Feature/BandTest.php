@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\LabelRole;
-use App\Enums\MusicGroupType;
-use App\Filament\Label\Resources\MusicGroups\Pages\CreateMusicGroup;
-use App\Filament\Label\Resources\MusicGroups\Pages\EditMusicGroup;
-use App\Filament\Label\Resources\MusicGroups\RelationManagers\MembersRelationManager;
+use App\Enums\BandType;
+use App\Filament\Label\Resources\Bands\Pages\CreateBand;
+use App\Filament\Label\Resources\Bands\Pages\EditBand;
+use App\Filament\Label\Resources\Bands\RelationManagers\MembersRelationManager;
 use App\Models\Artist;
 use App\Models\Label;
-use App\Models\MusicGroup;
+use App\Models\Band;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -30,68 +30,68 @@ beforeEach(function (): void {
 
     $this->singer = Artist::factory()->for($this->label)->create(['name' => 'Lead Singer']);
     $this->drummer = Artist::factory()->for($this->label)->create(['name' => 'Drummer']);
-    $this->group = MusicGroup::factory()->for($this->label)->withMembers([$this->singer])->create(['name' => 'Own Band']);
+    $this->band = Band::factory()->for($this->label)->withMembers([$this->singer])->create(['name' => 'Own Band']);
 
     $this->otherLabel = Label::factory()->create();
     $this->foreignArtist = Artist::factory()->for($this->otherLabel)->create(['name' => 'Foreign Artist']);
-    $this->foreignGroup = MusicGroup::factory()->for($this->otherLabel)->create(['name' => 'Foreign Band']);
+    $this->foreignBand = Band::factory()->for($this->otherLabel)->create(['name' => 'Foreign Band']);
 });
 
-it('lets an artist belong to several groups', function (): void {
-    $sideProject = MusicGroup::factory()->for($this->label)->create();
+it('lets an artist belong to several bands', function (): void {
+    $sideProject = Band::factory()->for($this->label)->create();
     $sideProject->members()->attach($this->singer, ['role' => 'Chant']);
 
-    expect($this->singer->musicGroups()->pluck('music_groups.id')->all())
-        ->toEqualCanonicalizing([$this->group->getKey(), $sideProject->getKey()]);
+    expect($this->singer->bands()->pluck('bands.id')->all())
+        ->toEqualCanonicalizing([$this->band->getKey(), $sideProject->getKey()]);
 });
 
 it('refuses a membership across labels at model level', function (): void {
-    $this->group->members()->attach($this->foreignArtist);
+    $this->band->members()->attach($this->foreignArtist);
 })->throws(LogicException::class);
 
 it('refuses a membership that ends before it starts', function (): void {
-    $this->group->members()->attach($this->drummer, ['joined_on' => '2024-01-01', 'left_on' => '2023-01-01']);
+    $this->band->members()->attach($this->drummer, ['joined_on' => '2024-01-01', 'left_on' => '2023-01-01']);
 })->throws(LogicException::class);
 
-it('lists only the groups of the current label', function (): void {
+it('lists only the bands of the current label', function (): void {
     $this->actingAs($this->manager)
-        ->get("/label/{$this->label->slug}/music-groups")
+        ->get("/label/{$this->label->slug}/bands")
         ->assertOk()
         ->assertSee('Own Band')
         ->assertDontSee('Foreign Band');
 });
 
-it('refuses to resolve a foreign group through the current label url', function (): void {
+it('refuses to resolve a foreign band through the current label url', function (): void {
     $this->actingAs($this->manager)
-        ->get("/label/{$this->label->slug}/music-groups/{$this->foreignGroup->getKey()}")
+        ->get("/label/{$this->label->slug}/bands/{$this->foreignBand->getKey()}")
         ->assertNotFound();
 });
 
-it('lets catalog managers create a group in the current label', function (): void {
+it('lets catalog managers create a band in the current label', function (): void {
     actingInLabel($this->manager, $this->label);
 
-    Livewire::test(CreateMusicGroup::class)
-        ->fillForm(['name' => 'New Collective', 'type' => MusicGroupType::Collective])
+    Livewire::test(CreateBand::class)
+        ->fillForm(['name' => 'New Collective', 'type' => BandType::Collective])
         ->call('create')
         ->assertHasNoFormErrors();
 
-    expect(MusicGroup::query()->withoutGlobalScopes()->firstWhere('name', 'New Collective'))
+    expect(Band::query()->withoutGlobalScopes()->firstWhere('name', 'New Collective'))
         ->label_id->toBe($this->label->getKey());
 });
 
-it('forbids viewers from creating groups', function (): void {
+it('forbids viewers from creating bands', function (): void {
     $viewer = User::factory()->create();
     $this->label->members()->attach($viewer, ['role' => LabelRole::Viewer]);
 
     $this->actingAs($viewer)
-        ->get("/label/{$this->label->slug}/music-groups/create")
+        ->get("/label/{$this->label->slug}/bands/create")
         ->assertForbidden();
 });
 
 it('attaches an artist of the same label with membership details', function (): void {
     actingInLabel($this->manager, $this->label);
 
-    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->group, 'pageClass' => EditMusicGroup::class])
+    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->band, 'pageClass' => EditBand::class])
         ->callAction(TestAction::make('attach')->table(), [
             'recordId' => $this->drummer->getKey(),
             'role' => 'Batterie',
@@ -99,20 +99,20 @@ it('attaches an artist of the same label with membership details', function (): 
         ])
         ->assertHasNoFormErrors();
 
-    expect($this->group->members()->whereKey($this->drummer)->first())
+    expect($this->band->members()->whereKey($this->drummer)->first())
         ->pivot->role->toBe('Batterie');
 });
 
 it('rejects attaching an artist of another label', function (): void {
     actingInLabel($this->manager, $this->label);
 
-    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->group, 'pageClass' => EditMusicGroup::class])
+    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->band, 'pageClass' => EditBand::class])
         ->callAction(TestAction::make('attach')->table(), [
             'recordId' => $this->foreignArtist->getKey(),
         ])
         ->assertHasFormErrors(['recordId']);
 
-    expect($this->group->members()->whereKey($this->foreignArtist)->exists())->toBeFalse();
+    expect($this->band->members()->whereKey($this->foreignArtist)->exists())->toBeFalse();
 });
 
 it('hides membership write actions from viewers', function (): void {
@@ -121,16 +121,16 @@ it('hides membership write actions from viewers', function (): void {
 
     actingInLabel($viewer, $this->label);
 
-    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->group, 'pageClass' => EditMusicGroup::class])
+    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->band, 'pageClass' => EditBand::class])
         ->assertActionHidden(TestAction::make('attach')->table())
         ->assertActionHidden(TestAction::make('detach')->table($this->singer));
 });
 
-it('denies group abilities on another label even to an owner', function (): void {
+it('denies band abilities on another label even to an owner', function (): void {
     $owner = User::factory()->create();
     Label::factory()->withMember($owner, LabelRole::Owner)->create();
 
-    expect($owner->can('view', $this->group))->toBeFalse()
-        ->and($owner->can('update', $this->group))->toBeFalse()
-        ->and($owner->can('manageMembers', $this->group))->toBeFalse();
+    expect($owner->can('view', $this->band))->toBeFalse()
+        ->and($owner->can('update', $this->band))->toBeFalse()
+        ->and($owner->can('manageMembers', $this->band))->toBeFalse();
 });

@@ -55,12 +55,12 @@ class Artist extends Model implements HasName
     /**
      * Groups this artist plays in (a single artist can belong to several groups).
      *
-     * @return BelongsToMany<MusicGroup, $this, MusicGroupMembership>
+     * @return BelongsToMany<Band, $this, BandMembership>
      */
-    public function musicGroups(): BelongsToMany
+    public function bands(): BelongsToMany
     {
-        return $this->belongsToMany(MusicGroup::class)
-            ->using(MusicGroupMembership::class)
+        return $this->belongsToMany(Band::class)
+            ->using(BandMembership::class)
             ->withPivot(['id', 'role', 'joined_on', 'left_on'])
             ->withTimestamps();
     }

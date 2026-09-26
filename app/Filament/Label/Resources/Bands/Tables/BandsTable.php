@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Label\Resources\MusicGroups\Tables;
+namespace App\Filament\Label\Resources\Bands\Tables;
 
-use App\Enums\MusicGroupType;
+use App\Enums\BandType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,7 +17,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class MusicGroupsTable
+class BandsTable
 {
     public static function configure(Table $table): Table
     {
@@ -46,7 +46,7 @@ class MusicGroupsTable
             ->filters([
                 SelectFilter::make('type')
                     ->label(__('Type'))
-                    ->options(MusicGroupType::class),
+                    ->options(BandType::class),
                 TrashedFilter::make(),
             ])
             ->recordActions([

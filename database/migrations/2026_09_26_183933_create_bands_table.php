@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('music_groups', function (Blueprint $table) {
+        Schema::create('bands', function (Blueprint $table) {
             $table->id();
             $table->foreignId('label_id')->constrained()->cascadeOnDelete();
             $table->string('name');
@@ -30,6 +30,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('music_groups');
+        Schema::dropIfExists('bands');
     }
 };

@@ -21,7 +21,7 @@ class ArtistsTable
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
-                ->with('musicGroups')
+                ->with('bands')
                 ->withCount(['releases', 'users']))
             ->defaultSort('name')
             ->columns([
@@ -32,7 +32,7 @@ class ArtistsTable
                 TextColumn::make('country')
                     ->label(__('Pays'))
                     ->sortable(),
-                TextColumn::make('musicGroups.name')
+                TextColumn::make('bands.name')
                     ->label(__('Groupes'))
                     ->badge()
                     ->placeholder('—')

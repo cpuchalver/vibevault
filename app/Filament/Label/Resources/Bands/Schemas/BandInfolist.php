@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Label\Resources\MusicGroups\Schemas;
+namespace App\Filament\Label\Resources\Bands\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class MusicGroupInfolist
+class BandInfolist
 {
     public static function configure(Schema $schema): Schema
     {

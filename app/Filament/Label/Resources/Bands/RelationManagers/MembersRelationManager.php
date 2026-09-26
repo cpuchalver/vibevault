@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Label\Resources\MusicGroups\RelationManagers;
+namespace App\Filament\Label\Resources\Bands\RelationManagers;
 
-use App\Models\MusicGroup;
+use App\Models\Band;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -23,12 +23,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Members of a group.
+ * Members of a band.
  *
  * Security: Filament only checks `isReadOnly()` for attach/detach actions, so every
- * write action is explicitly authorized against MusicGroupPolicy::manageMembers().
- * Attachable artists are restricted to the group's own label (and re-checked on submit
- * by Filament, then by the MusicGroupMembership integrity guard).
+ * write action is explicitly authorized against BandPolicy::manageMembers().
+ * Attachable artists are restricted to the band's own label (and re-checked on submit
+ * by Filament, then by the BandMembership integrity guard).
  */
 class MembersRelationManager extends RelationManager
 {
@@ -51,7 +51,7 @@ class MembersRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->modelLabel(__('membre'))
             ->pluralModelLabel(__('membres'))
-            ->defaultSort('artist_music_group.joined_on')
+            ->defaultSort('artist_band.joined_on')
             ->columns([
                 TextColumn::make('name')
                     ->label(__('Artiste'))
@@ -76,9 +76,9 @@ class MembersRelationManager extends RelationManager
                     ->label(__('Membres actuels'))
                     ->queries(
                         true: fn (Builder $query): Builder => $query->where(fn (Builder $query): Builder => $query
-                            ->whereNull('artist_music_group.left_on')
-                            ->orWhere('artist_music_group.left_on', '>', now())),
-                        false: fn (Builder $query): Builder => $query->where('artist_music_group.left_on', '<=', now()),
+                            ->whereNull('artist_band.left_on')
+                            ->orWhere('artist_band.left_on', '>', now())),
+                        false: fn (Builder $query): Builder => $query->where('artist_band.left_on', '<=', now()),
                     ),
             ])
             ->headerActions([
@@ -109,10 +109,10 @@ class MembersRelationManager extends RelationManager
 
     protected function canManageMembers(): bool
     {
-        /** @var MusicGroup $group */
-        $group = $this->getOwnerRecord();
+        /** @var Band $band */
+        $band = $this->getOwnerRecord();
 
-        return ! $this->isReadOnly() && Gate::allows('manageMembers', $group);
+        return ! $this->isReadOnly() && Gate::allows('manageMembers', $band);
     }
 
     /**

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Label\Resources\MusicGroups;
+namespace App\Filament\Label\Resources\Bands;
 
-use App\Filament\Label\Resources\MusicGroups\Pages\CreateMusicGroup;
-use App\Filament\Label\Resources\MusicGroups\Pages\EditMusicGroup;
-use App\Filament\Label\Resources\MusicGroups\Pages\ListMusicGroups;
-use App\Filament\Label\Resources\MusicGroups\Pages\ViewMusicGroup;
-use App\Filament\Label\Resources\MusicGroups\RelationManagers\MembersRelationManager;
-use App\Filament\Label\Resources\MusicGroups\Schemas\MusicGroupForm;
-use App\Filament\Label\Resources\MusicGroups\Schemas\MusicGroupInfolist;
-use App\Filament\Label\Resources\MusicGroups\Tables\MusicGroupsTable;
-use App\Models\MusicGroup;
+use App\Filament\Label\Resources\Bands\Pages\CreateBand;
+use App\Filament\Label\Resources\Bands\Pages\EditBand;
+use App\Filament\Label\Resources\Bands\Pages\ListBands;
+use App\Filament\Label\Resources\Bands\Pages\ViewBand;
+use App\Filament\Label\Resources\Bands\RelationManagers\MembersRelationManager;
+use App\Filament\Label\Resources\Bands\Schemas\BandForm;
+use App\Filament\Label\Resources\Bands\Schemas\BandInfolist;
+use App\Filament\Label\Resources\Bands\Tables\BandsTable;
+use App\Models\Band;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,11 +24,11 @@ use UnitEnum;
 
 /**
  * Groups of the current label. Scoped by Filament tenancy (`label` ownership
- * relationship) and authorized by MusicGroupPolicy.
+ * relationship) and authorized by BandPolicy.
  */
-class MusicGroupResource extends Resource
+class BandResource extends Resource
 {
-    protected static ?string $model = MusicGroup::class;
+    protected static ?string $model = Band::class;
 
     protected static bool $isScopedToTenant = true;
 
@@ -52,17 +52,17 @@ class MusicGroupResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return MusicGroupForm::configure($schema);
+        return BandForm::configure($schema);
     }
 
     public static function infolist(Schema $schema): Schema
     {
-        return MusicGroupInfolist::configure($schema);
+        return BandInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return MusicGroupsTable::configure($table);
+        return BandsTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -75,10 +75,10 @@ class MusicGroupResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListMusicGroups::route('/'),
-            'create' => CreateMusicGroup::route('/create'),
-            'view' => ViewMusicGroup::route('/{record}'),
-            'edit' => EditMusicGroup::route('/{record}/edit'),
+            'index' => ListBands::route('/'),
+            'create' => CreateBand::route('/create'),
+            'view' => ViewBand::route('/{record}'),
+            'edit' => EditBand::route('/{record}/edit'),
         ];
     }
 

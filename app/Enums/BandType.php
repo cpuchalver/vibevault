@@ -6,7 +6,7 @@ namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum MusicGroupType: string implements HasLabel
+enum BandType: string implements HasLabel
 {
     case Band = 'band';
     case Duo = 'duo';

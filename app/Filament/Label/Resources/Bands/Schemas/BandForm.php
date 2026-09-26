@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Label\Resources\MusicGroups\Schemas;
+namespace App\Filament\Label\Resources\Bands\Schemas;
 
-use App\Enums\MusicGroupType;
+use App\Enums\BandType;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -13,7 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
-class MusicGroupForm
+class BandForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -28,8 +28,8 @@ class MusicGroupForm
                             ->maxLength(120),
                         Select::make('type')
                             ->label(__('Type de formation'))
-                            ->options(MusicGroupType::class)
-                            ->default(MusicGroupType::Band)
+                            ->options(BandType::class)
+                            ->default(BandType::Band)
                             ->required(),
                         TextInput::make('country')
                             ->label(__('Pays (ISO 3166-1 alpha-2)'))
