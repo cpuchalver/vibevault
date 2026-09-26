@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\BandType;
 use App\Enums\LabelRole;
+use App\Filament\Label\Resources\Artists\Pages\CreateArtist;
 use App\Filament\Label\Resources\Bands\Pages\CreateBand;
 use App\Filament\Label\Resources\Bands\Pages\EditBand;
 use App\Filament\Label\Resources\Bands\RelationManagers\MembersRelationManager;
@@ -73,12 +74,90 @@ it('lets catalog managers create a band in the current label', function (): void
     actingInLabel($this->manager, $this->label);
 
     Livewire::test(CreateBand::class)
-        ->fillForm(['name' => 'New Collective', 'type' => BandType::Collective])
+        ->fillForm([
+            'name' => 'New Collective',
+            'type' => BandType::Collective,
+            'members' => [$this->singer->getKey(), $this->drummer->getKey()],
+        ])
         ->call('create')
         ->assertHasNoFormErrors();
 
-    expect(Band::query()->withoutGlobalScopes()->firstWhere('name', 'New Collective'))
-        ->label_id->toBe($this->label->getKey());
+    $band = Band::query()->withoutGlobalScopes()->firstWhere('name', 'New Collective');
+
+    expect($band->label_id)->toBe($this->label->getKey())
+        ->and($band->members()->pluck('artists.id')->all())
+        ->toEqualCanonicalizing([$this->singer->getKey(), $this->drummer->getKey()]);
+});
+
+it('requires at least one member when creating a band', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(CreateBand::class)
+        ->fillForm(['name' => 'Empty Band', 'type' => BandType::Band, 'members' => []])
+        ->call('create')
+        ->assertHasFormErrors(['members']);
+
+    expect(Band::query()->withoutGlobalScopes()->where('name', 'Empty Band')->exists())->toBeFalse();
+});
+
+it('limits a solo project to a single member', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(CreateBand::class)
+        ->fillForm([
+            'name' => 'Not So Solo',
+            'type' => BandType::Solo,
+            'members' => [$this->singer->getKey(), $this->drummer->getKey()],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['members']);
+});
+
+it('rejects members from another label in the band form', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(CreateBand::class)
+        ->fillForm([
+            'name' => 'Hijack Band',
+            'type' => BandType::Band,
+            'members' => [$this->singer->getKey(), $this->foreignArtist->getKey()],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['members']);
+
+    expect(Band::query()->withoutGlobalScopes()->where('name', 'Hijack Band')->exists())->toBeFalse();
+});
+
+it('refuses to turn a multi-member band into a solo project', function (): void {
+    $this->band->members()->attach($this->drummer);
+
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(EditBand::class, ['record' => $this->band->getKey()])
+        ->fillForm(['type' => BandType::Solo])
+        ->call('save')
+        ->assertHasFormErrors(['type']);
+});
+
+it('refuses to remove the last member of a band', function (): void {
+    $this->band->members()->detach($this->singer);
+})->throws(LogicException::class);
+
+it('refuses a second member in a solo project', function (): void {
+    $solo = Band::factory()->solo($this->singer)->create();
+
+    $solo->members()->attach($this->drummer);
+})->throws(LogicException::class);
+
+it('refuses to hard-delete the only member of a band', function (): void {
+    $this->singer->forceDelete();
+})->throws(LogicException::class);
+
+it('hides the detach action on the last member', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $this->band, 'pageClass' => EditBand::class])
+        ->assertActionHidden(TestAction::make('detach')->table($this->singer));
 });
 
 it('forbids viewers from creating bands', function (): void {
@@ -142,3 +221,30 @@ it('refuses to hard-delete a band that still has releases', function (): void {
 
     $this->band->forceDelete();
 })->throws(QueryException::class);
+
+it('creates the solo project of a new artist when requested', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(CreateArtist::class)
+        ->fillForm(['name' => 'Newcomer', 'create_solo_project' => true])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $artist = Artist::query()->firstWhere('name', 'Newcomer');
+    $solo = $artist->bands()->sole();
+
+    expect($solo->type)->toBe(BandType::Solo)
+        ->and($solo->name)->toBe('Newcomer')
+        ->and($solo->label_id)->toBe($this->label->getKey());
+});
+
+it('creates no band when the solo project option is off', function (): void {
+    actingInLabel($this->manager, $this->label);
+
+    Livewire::test(CreateArtist::class)
+        ->fillForm(['name' => 'Session Player', 'create_solo_project' => false])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Artist::query()->firstWhere('name', 'Session Player')->bands()->exists())->toBeFalse();
+});
