@@ -10,6 +10,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,7 @@ use Illuminate\Support\Collection;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, HasTenants
+class User extends Authenticatable implements FilamentUser, HasTenants, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -61,12 +62,14 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return $this->belongsToMany(Artist::class)->withTimestamps();
     }
 
+    /**
+     * Membership check only. Email verification is enforced separately by the
+     * panels' `emailVerification()` (Filament's `verified` middleware on every
+     * page), which redirects to the verification prompt instead of a 403, so
+     * that the signed verification link itself remains reachable.
+     */
     public function canAccessPanel(Panel $panel): bool
     {
-        if (! $this->hasVerifiedEmail()) {
-            return false;
-        }
-
         return match ($panel->getId()) {
             self::LabelPanel => $this->labels()->exists(),
             self::ArtistPanel => $this->artists()->exists(),
