@@ -18,6 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetSecurityHeaders::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+        ]);
+
+        $middleware->redirectGuestsTo(fn (): string => route('filament.label.auth.login'));
+        $middleware->redirectUsersTo('/label');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
